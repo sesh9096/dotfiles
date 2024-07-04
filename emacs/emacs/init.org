@@ -1,0 +1,1321 @@
+# -*- eval: (add-hook 'after-save-hook 'org-babel-tangle nil t); -*-
+
+#+TITLE: Emacs Configuration
+#+AUTHOR: Sean Shi
+#+DESCRIPTION: The first emacs configuration by ss7241
+#+STARTUP: fold
+#+OPTIONS: toc:2
+#+PROPERTY: header-args:emacs-lisp :tangle ~/.config/emacs/init.el :results silent
+
+* Generic
+** package setup
+<2024-03-10 Sun> Started this Org doc from a previous config
+The statements below make sure package and use package are working,
+add the melpa package archive
+packages should be installed automatically
+
+Helpful resources:
+[[info:emacs][emacs manual]]
+
+Interactive repl
+=M-x ieml=
+
+#+begin_src emacs-lisp
+(require 'package)
+  (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/"))
+  (package-initialize)
+(require 'use-package)
+(setq use-package-always-ensure t)
+#+end_src
+#+begin_src emacs-lisp :tangle no
+;; when use-package has issues, may be because packages are out of date
+(package-refresh-contents)
+#+end_src
+** Tweaks
+# #+begin_src emacs-lisp
+#   (defun org-babel-tangle-config() when (string-equal buffer-file-name (expand-file-name "~/.config/emacs/init.org")) let ((org-babel-tangle)))
+#   (add-hook 'org-mode-hook (lambda() add-hook 'after-save-hook #'org-babel-tangle-config))
+# #+end_src
+#+begin_src emacs-lisp
+;; Tune the garbage collector
+(setq gc-cons-threshold 20000000)
+#+end_src
+#+begin_src emacs-lisp
+(add-to-list 'default-frame-alist '(font . "monospace-9"))
+#+end_src
+** Utility packages
+#+begin_src emacs-lisp
+(use-package noflet)
+#+end_src
+* Keybinding Packages
+** Evil
+*** Evil Mode
+#+begin_src emacs-lisp
+(use-package evil
+  :ensure t
+  :init
+  (setq evil-want-integration t ;; This is optional since it's already set to t by default.
+   evil-want-keybinding nil
+   evil-vsplit-window-right t
+   evil-want-C-u-scroll t
+   evil-split-window-below t
+   evil-want-Y-yank-to-eol t)
+  ;; Solved this on 2024-03-01, took too long
+  :custom (evil-undo-system 'undo-redo)
+  :config
+  (setq evil-visual-update-x-selection-p nil)
+  ;;(evil-select-search-module 'evil-search-module 'evil-search)
+  (evil-mode 1))
+#+end_src
+*** Evil Collection
+A collection of key bindings similar to evil mode for all the modes
+#+begin_src emacs-lisp
+(use-package evil-collection
+  :after evil
+  :ensure t
+  :init
+  :config
+  (evil-collection-init)
+  :custom
+  (evil-collection-key-blacklist '("SPC"))
+)
+#+end_src
+** Which Key
+Which key shows a popup for which keys can by typed next in a keybinding.
+Very useful since Emacs has a lot of these.
+[[https://github.com/justbur/emacs-which-key/blob/master/README.org][readme docs]]
+#+begin_src emacs-lisp
+(use-package which-key
+  :init
+  (which-key-mode)
+  :custom
+  (which-key-allow-evil-operators t)
+  (which-key-idle-delay 0.5)
+  ;; (which-key-show-operator-state-maps t)
+  (which-key-show-prefix 'top)
+  (which-key-show-remaining-keys t)
+  (which-key-special-keys '("SPC" "TAB" "RET" "ESC" "DEL"))
+)
+#+end_src
+** TODO Hydra
+Use this to do window management better
+* Projects
+** Git
+*** TODO Magit
+A git interface
+Figure out how this works better.
+#+begin_src emacs-lisp
+(use-package magit
+  )
+#+end_src
+*** diff-hl
+#+begin_src emacs-lisp
+(use-package diff-hl
+  :init
+  (global-diff-hl-mode)
+  (diff-hl-dired-mode 1)
+  (diff-hl-flydiff-mode 1)
+)
+#+end_src
+** TODO Other
+*** DONE Projectile
+#+begin_src emacs-lisp
+(use-package projectile
+  :init (projectile-mode 1)
+  (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
+)
+#+end_src
+*** TODO Fuzzy Finding
+* Completion
+** Mini-buffer
+*** Vertico:
+#+begin_src emacs-lisp
+(use-package vertico
+  :init
+  (vertico-mode)
+
+  ;; Different scroll margin
+  ;; (setq vertico-scroll-margin 0)
+
+  ;; Show more candidates
+  ;; (setq vertico-count 20)
+
+  ;; Grow and shrink the Vertico minibuffer
+  ;; (setq vertico-resize t)
+
+  ;; Optionally enable cycling for `vertico-next' and `vertico-previous'.
+  ;; (setq vertico-cycle t)
+  )
+#+end_src
+*** Marginalia
+Use margins for more useful purpose
+#+begin_src emacs-lisp
+(use-package marginalia
+  ;; Bind `marginalia-cycle' locally in the minibuffer.  To make the binding
+  ;; available in the *Completions* buffer, add it to the
+  ;; `completion-list-mode-map'.
+  :bind (:map minibuffer-local-map
+         ("M-A" . marginalia-cycle))
+
+  ;; The :init section is always executed.
+  :init
+
+  ;; Marginalia must be activated in the :init section of use-package such that
+  ;; the mode gets enabled right away. Note that this forces loading the
+  ;; package.
+  (marginalia-mode))
+#+end_src
+*** Orderless
+#+begin_src emacs-lisp
+(use-package orderless
+  :ensure t
+  :custom
+  (completion-styles '(orderless basic))
+  (completion-category-overrides '((file (styles basic partial-completion orderless flex))))
+)
+#+end_src
+*** History
+#+begin_src emacs-lisp
+(recentf-mode 1)
+(setq history-length 24)
+(savehist-mode 1)
+#+end_src
+*** Consult
+#+begin_src emacs-lisp
+(use-package consult)
+#+end_src
+*** Fuzzy
+Trying out fzf right now due to terrible performance by =consult-find=.
+
+Try out flx, affe, ...?
+#+begin_src emacs-lisp
+;; fzf wrapper
+;; (use-package fzf)
+#+end_src
+** In buffer
+*** TODO Corfu
+Completion Menu
+Tweak setting for faster response time
+#+begin_src emacs-lisp
+(use-package corfu
+  ;; Optional customizations
+  :custom
+  (corfu-auto t)                 ;; Enable auto completion
+  (corfu-auto-prefix 2)          ;; auto complete after 2 chars
+  (corfu-auto-delay 0.25)
+  (corfu-echo-delay '(0.25 . 0.25))
+  (corfu-popupinfo-delay '(0.5 . 0.25))
+  (corfu-quit-no-match 'separator) ;; or t
+  (corfu-cycle t)                ;; Enable cycling for `corfu-next/previous'
+  ;; (corfu-separator ?\s)          ;; Orderless field separator
+  ;; (corfu-quit-at-boundary nil)   ;; Never quit at completion boundary
+  ;; (corfu-quit-no-match nil)      ;; Never quit, even if there is no match
+  (corfu-preview-current t)
+  (corfu-popupinfo-mode 1)
+  (corfu-history-mode 1)
+  ;; (corfu-preselect 'prompt)      ;; Preselect the prompt
+  (corfu-on-exact-match nil)     ;; Configure handling of exact matches
+  ;; (corfu-scroll-margin 5)        ;; Use scroll margin
+
+  ;; Enable Corfu only for certain modes.
+  ;; :hook ((prog-mode . corfu-mode)
+  ;;        (shell-mode . corfu-mode)
+  ;;        (eshell-mode . corfu-mode))
+
+  ;; Recommended: Enable Corfu globally.  This is recommended since Dabbrev can
+  ;; be used globally (M-/).  See also the customization variable
+  ;; `global-corfu-modes' to exclude certain modes.
+  :init
+  (global-corfu-mode)
+  (corfu-echo-mode 1)
+  :bind (:map corfu-map
+  ("C-y" . corfu-insert )
+  ("RET" . nil))
+  :config
+  (evil-define-key 'insert corfu-map (kbd "C-y") 'corfu-insert)
+)
+#+end_src
+Optional Extras
+#+begin_src emacs-lisp
+;; ;; A few more useful configurations...
+;; (use-package emacs
+;;   :init
+;;   ;; TAB cycle if there are only few candidates
+;;   (setq completion-cycle-threshold 3)
+;; 
+;;   ;; Emacs 28: Hide commands in M-x which do not apply to the current mode.
+;;   ;; Corfu commands are hidden, since they are not supposed to be used via M-x.
+;;   ;; (setq read-extended-command-predicate
+;;   ;;       #'command-completion-default-include-p)
+;; 
+;;   ;; Enable indentation+completion using the TAB key.
+;;   ;; `completion-at-point' is often bound to M-TAB.
+;;   (setq tab-always-indent 'complete))
+#+end_src
+*** Capf
+**** Cape
+A bunch of Completion At Point Functions
+#+begin_src emacs-lisp
+(use-package cape
+  ;; :bind (("C-c p p" . completion-at-point) ;; capf
+  ;; 	 ("C-c p t" . complete-tag)        ;; etags
+  ;; 	 ("C-c p d" . cape-dabbrev)        ;; or dabbrev-completion
+  ;; 	 ("C-c p h" . cape-history)
+  ;; 	 ("C-c p f" . cape-file)
+  ;; 	 ("C-c p k" . cape-keyword)
+  ;; 	 ("C-c p s" . cape-elisp-symbol)
+  ;; 	 ("C-c p e" . cape-elisp-block)
+  ;; 	 ("C-c p a" . cape-abbrev)
+  ;; 	 ("C-c p l" . cape-line)
+  ;; 	 ("C-c p w" . cape-dict)
+  ;; 	 ("C-c p :" . cape-emoji)
+  ;; 	 ("C-c p \\" . cape-tex)
+  ;; 	 ("C-c p _" . cape-tex)
+  ;; 	 ("C-c p ^" . cape-tex)
+  ;; 	 ("C-c p &" . cape-sgml)
+  ;; 	 ("C-c p r" . cape-rfc1345))
+  :init
+  ;; Add to the global default value of `completion-at-point-functions' which is
+  ;; used by `completion-at-point'.  The order of the functions matters, the
+  ;; first function returning a result wins.  Note that the list of buffer-local
+  ;; completion functions takes precedence over the global list.
+  ;; (add-to-list 'completion-at-point-functions #'cape-dabbrev)
+  (add-to-list 'completion-at-point-functions #'cape-file)
+  (add-to-list 'completion-at-point-functions #'cape-elisp-block)
+  (add-to-list 'completion-at-point-functions #'cape-abbrev)
+  ;;(add-to-list 'completion-at-point-functions #'cape-history)
+  ;;(add-to-list 'completion-at-point-functions #'cape-keyword)
+  ;; (add-to-list 'completion-at-point-functions #'cape-tex)
+  ;;(add-to-list 'completion-at-point-functions #'cape-sgml)
+  ;;(add-to-list 'completion-at-point-functions #'cape-rfc1345)
+  ;; (add-to-list 'completion-at-point-functions #'cape-dict)
+  ;;(add-to-list 'completion-at-point-functions #'cape-elisp-symbol)
+  ;;(add-to-list 'completion-at-point-functions #'cape-line)
+  )
+
+#+end_src
+**** Yasnippet-capf
+#+begin_src emacs-lisp
+(use-package yasnippet-capf
+  :after cape
+  :config
+  ;; (add-to-list 'completion-at-point-functions #'yasnippet-capf)
+)
+#+end_src
+**** Additional
+#+begin_src emacs-lisp
+(defun cape-dabbrev-keyword-snip ()
+  (cape-wrap-super #'cape-dabbrev #'cape-keyword #'yasnippet-capf))
+(add-to-list 'completion-at-point-functions #'cape-dabbrev-keyword-snip)
+#+end_src
+*** Dabbrev
+#+begin_src emacs-lisp
+(use-package dabbrev
+  ;; Swap M-/ and C-M-/
+  :ensure nil
+  :bind (("M-/" . dabbrev-completion)
+     	 ("C-M-/" . dabbrev-expand))
+  :config
+  (add-to-list 'dabbrev-ignored-buffer-regexps "\\` ")
+  ;; Since 29.1, use `dabbrev-ignored-buffer-regexps' on older.
+  (add-to-list 'dabbrev-ignored-buffer-modes 'doc-view-mode)
+  (add-to-list 'dabbrev-ignored-buffer-modes 'pdf-view-mode))
+#+end_src
+** Snippets
+YASnippet
+#+begin_src emacs-lisp
+(use-package yasnippet
+  :init
+  (yas-global-mode 1)
+)
+#+end_src
+#+begin_src emacs-lisp
+(use-package yasnippet-snippets
+)
+#+end_src
+Other options:
+- tempo
+- tempel
+- skeleton
+* Major Modes
+** pdf-view
+#+begin_src emacs-lisp
+(use-package pdf-tools
+  :init (pdf-tools-install)
+  :custom (pdf-view-midnight-colors '("#ffffff" . "#000000"))
+)
+#+end_src
+** markdown
+#+begin_src emacs-lisp
+(use-package markdown-mode
+  :ensure t
+  :mode ("README\\.md\\'" . gfm-mode)
+  :init (setq markdown-command "multimarkdown"))
+#+end_src
+** latex
+#+begin_src emacs-lisp
+;; (use-package auctex
+;;   :disabled
+;; )
+#+end_src
+#+begin_src emacs-lisp
+(use-package cdlatex)
+#+end_src
+** plantuml
+#+begin_src emacs-lisp
+(setq plantuml-default-exec-mode 'executable)
+(setq org-plantuml-exec-mode 'executable)
+(setq org-plantuml-jar-path "/usr/share/java/plantuml/plantuml.jar")
+#+end_src
+** c
+#+begin_src emacs-lisp
+#+end_src
+** zig
+#+begin_src emacs-lisp
+(use-package zig-mode)
+#+end_src
+** info
+[[info:info#Advanced][info]]
+** vterm
+#+begin_src emacs-lisp
+(use-package vterm
+    :ensure t)
+#+end_src
+* Files
+** Dired
+Emacs builtin file manager.
+Set this up to use more vim-like keys similar to =lf=.
+Will start with short listings by default as to not be super annoying
+| Mode  | Key     | purpose                               |
+|-------+---------+---------------------------------------|
+| Any   | C-x d   | launch dired in chosen directory      |
+| Any   | C-x C-j | dired in current directory            |
+| Dired | C-x C-q | make changes by directly editing info |
+| Dired | C-c C-c | commit changes                        |
+| Dired | C-c C-k | discard changes                       |
+
+#+begin_src emacs-lisp
+(use-package dired
+  :ensure nil
+  :defer t
+  :commands (dired dired-jump)
+  :bind ("C-x C-j" . dired-jump)
+  ;; :hook ((dired-mode . dired-hide-details-mode))
+  :config
+  (evil-collection-define-key 'normal 'dired-mode-map
+    "h" 'dired-up-directory
+    "a" 'dired-create-directory
+    "l" 'dired-find-file)
+  :custom
+  (dired-listing-switches "-ahvlD --group-directories-first")
+  (delete-by-moving-to-trash t)
+  (dired-dwim-target t)
+  (dired-kill-when-opening-new-dired-buffer t)
+)
+(put 'dired-find-alternate-file 'disabled nil)
+(put 'dired-jump nil 'dired-jump-map)
+#+end_src
+Shadow mode i.e. new path without deleting old path
+#+begin_src emacs-lisp
+(file-name-shadow-mode 1)
+(add-hook 'rfn-eshadow-update-overlay-hook #'vertigo-directory-tidy)
+#+end_src
+
+*wdired*
+#+begin_src emacs-lisp
+(setq wdired-use-interactive-rename t
+      wdired-confirm-overwrite t
+      wdired-allow-to-redirect-links t
+      wdired-allow-to-change-permissions t)
+#+end_src
+** Keeping things clean
+*** Backup files
+(=file.txt~ to dir!file.txt=)
+#+begin_src emacs-lisp
+;; (make-directory (expand-file-name "autosave/" user-emacs-directory) t)
+(setq backup-directory-alist `(("." . ,(expand-file-name "emacs/backups/" (getenv "XDG_STATE_HOME")))))
+
+;; Not recommended
+;; (setq make-backup-files nil)
+#+end_src
+*** Autosaves
+(=#file.txt#=)
+#+begin_src emacs-lisp
+;; make a directory, it doesn't happen automatically
+;; (make-directory (expand-file-name "autosave/" user-emacs-directory) t)
+;; (setq auto-save-list-file-prefix (expand-file-name "autosave/session/" user-emacs-directory)
+;; auto-save-file-name-transforms `((".*" ,(expand-file-name "autosave/" user-emacs-directory))))
+#+end_src
+*** Lockfiles
+(=.#file.txt=)
+~(setq create-lockfiles nil)~
+** Treemacs?
+#+begin_src emacs-lisp
+;; (use-package treemacs)
+#+end_src
+* Formatting
+** TODO Delim
+*** rainbow delimiters
+#+begin_src emacs-lisp
+(use-package rainbow-delimiters
+  :init (add-hook 'prog-mode-hook #'rainbow-delimiters-mode)
+  )
+#+end_src
+
+*** smartparens
+Checkout if =electric-pair-mode= will work, remove?
+#+begin_src emacs-lisp :tangle no
+;; (use-package smartparens-mode
+;;   :ensure smartparens  ;; install the package
+;;   :hook (prog-mode text-mode markdown-mode) ;; add `smartparens-mode` to these hooks
+;;   :config
+;;   ;; load default config
+;;   (require 'smartparens-config)
+;; (sp-local-pair 'emacs-lisp-mode "'" nil :actions :rem )
+;; )
+#+end_src
+#+begin_src emacs-lisp
+(electric-pair-mode 1)
+;; (electric-pair-mo)
+#+end_src
+*** surround
+You can surround in visual-state with S<textobject> or gS<textobject>. Or in normal-state with ys<textobject> or yS<textobject.
+You can change a surrounding with cs<old-textobject><new-textobject>.
+You can delete a surrounding with ds<textobject>.
+[[https://github.com/emacs-evil/evil-surround?tab=readme-ov-file][more info]]
+#+begin_src emacs-lisp
+(use-package evil-surround
+  :ensure t
+  :config
+  (global-evil-surround-mode 1))
+#+end_src
+
+** Tabs
+[[https://dougie.io/emacs/indentation/][useful article on these configs]]
+#+begin_src emacs-lisp
+;; (defun disable-tabs () (setq indent-tabs-mode nil))
+;; (defun enable-tabs  ()
+  ;; (local-set-key (kbd "TAB") 'tab-to-tab-stop)
+  ;; (setq indent-tabs-mode t)
+  ;; (setq tab-width custom-tab-width))
+#+end_src
+
+#+begin_src emacs-lisp
+;; ;; Hooks to Enable Tabs
+;; (add-hook 'prog-mode-hook 'enable-tabs)
+;; ;; Hooks to Disable Tabs
+;; (add-hook 'lisp-mode-hook 'disable-tabs)
+;; (add-hook 'emacs-lisp-mode-hook 'disable-tabs
+#+end_src
+
+#+begin_src emacs-lisp
+(indent-tabs-mode 1)
+(setq-default tab-width 4)
+(setq-default electric-indent-inhibit t)
+(setq backward-delete-char-untabify-method 'hungry)
+#+end_src
+
+** Whitespace
+#+begin_src emacs-lisp
+(setq whitespace-style '(face tabs tab-mark trailing))
+(custom-set-faces
+ '(whitespace-tab ((t (:foreground "#636363" :background "#111111")))))
+(setq whitespace-display-mappings
+  '((tab-mark 9 [124 9] [92 9]))) ; 124 is the ascii ID for '\|'
+(global-whitespace-mode) ; Enable whitespace mode everywhere
+#+end_src
+* Editing
+** Comment
+Better behavior for commenting
+#+begin_src emacs-lisp
+(use-package evil-nerd-commenter
+  :config
+  (evilnc-default-hotkeys)
+  (add-hook 'c-mode-common-hook
+    (lambda ()
+      ;; Preferred comment style
+      (setq comment-start "// "
+            comment-end "")))
+)
+#+end_src
+** evil-numbers
+Increment and decrement numbers
+#+begin_src emacs-lisp
+(use-package evil-numbers
+  ;; :bind
+  ;;   (("C-a" . evil-numbers/inc-at-pt)
+  ;;   ("C-s" . evil-numbers/dec-at-pt)) ;; C-x is taken, C-s is originally bound to isearch-forward, but / does the same thing
+  :config
+    (define-key evil-normal-state-map "\C-a" 'evil-numbers/inc-at-pt)
+    (define-key evil-normal-state-map "\C-s" 'evil-numbers/dec-at-pt)
+    (define-key evil-normal-state-map "g\C-a" 'evil-numbers/inc-at-pt-incremental)
+    (define-key evil-normal-state-map "g\C-s" 'evil-numbers/dec-at-pt-incremental)
+)
+#+end_src
+** Fold
+#+begin_src emacs-lisp
+(add-hook 'prog-mode-hook #'hs-minor-mode)
+#+end_src
+* LSP
+** eglot
+#+begin_src emacs-lisp
+(use-package eglot
+:ensure nil
+:config
+(eglot-inlay-hints-mode 0)
+;; :custom
+;; eglot-ignored-server-capabilities '(:inlayHintProvider)
+)
+#+end_src
+* DAP
+#+begin_src emacs-lisp
+;; (use-package dape
+;; :ensure nil
+;; :
+;; )
+#+end_src
+* TS
+#+begin_src emacs-lisp
+(require 'treesit)
+#+end_src
+* Org
+** Languages
+*** Babel
+#+begin_src emacs-lisp
+(use-package ess) ; for use with R
+#+end_src
+
+#+begin_src emacs-lisp
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+  '((emacs-lisp . t)
+    (python . t)
+    (plantuml . t)
+    (shell . t)
+    (dot . t)
+    (R . t)))
+(setq org-confirm-babel-evaluate nil)
+#+end_src
+
+Nice syntax highlighting
+#+begin_src emacs-lisp
+  ;; (setq org-latex-listings 'engraved)
+;;(setq org-latex-listings 'engraved)
+#+end_src
+** Editing
+*** tempo
+#+begin_src emacs-lisp
+(require 'org-tempo)
+(dolist (cell '(("el" . "src emacs-lisp")
+               ("py" . "src python")
+               ("sh" . "src shell")
+               ("dot" . "src dot")
+               ("puml" . "src plantuml")
+               ("R" . "src R")))
+         (add-to-list 'org-structure-template-alist cell))
+#+end_src
+*** latex
+#+begin_src emacs-lisp
+;; cdlatex added under latex section
+(add-hook 'org-mode-hook #'turn-on-org-cdlatex)
+#+end_src
+*** etc
+#+begin_src emacs-lisp
+;; (add-hook 'org-mode-hook #'visual-line-mode)
+#+end_src
+** Format
+*** lists
+#+begin_src emacs-lisp
+(setq org-list-allow-alphabetical t
+  ;; org-list-indent-offset 1
+)
+#+end_src
+*** tabs
+#+begin_src emacs-lisp
+;; (use-package toc-org
+;; )
+#+end_src
+#+begin_src emacs-lisp
+;; indent fix with org mode
+(setq org-src-tab-acts-natively t)
+(setq org-src-preserve-indentation t)
+;; technically not necessary with the line above
+(setq org-edit-src-content-indentation 0)
+#+end_src
+#+begin_src emacs-lisp
+;; turn off tabs in org mode
+(add-hook 'org-mode-hook (lambda () (indent-tabs-mode -1)))
+#+end_src
+
+** Commands
+Allows for auto-tangling this file
+#+begin_src emacs-lisp
+(setq safe-local-variable-values
+  '((eval add-hook 'after-save-hook 'org-babel-tangle nil t)
+  ;; (eval add-hook 'after-save-hook 'org-babel-tangle)
+))
+#+end_src
+** Export
+*** LaTeX
+[[help:org-latex-src-block-backend][options]]
+Consider switching to engraved?
+#+begin_src emacs-lisp
+(setq org-export-allow-bind-keywords t)
+(require 'ox-latex)
+(setq org-latex-src-block-backend 'minted)
+(add-to-list 'org-latex-packages-alist '("newfloat" "minted"))
+(setq org-latex-pdf-process '("latexmk -f -shell-escape -pdf -%latex -interaction=nonstopmode -output-directory=%o %f"))
+#+end_src
+*** HTML
+#+begin_src emacs-lisp
+(setq org-html-validation-link nil
+      org-html-head-include-scripts nil
+      org-html-preamble t
+      ;; org-html-postamble nil
+      org-html-head-include-default-style nil
+)
+(setq org-html-postamble-format '(("en" "<p class=\"creator\">Created With %c</p> ")))
+(setq org-html-preamble-format '(("en" "<nav id=navbar class=nav> <div class=container style=display:flex;justify-content:space-between> <div> <a href=\"/home.html\" class=navbar-item>Home</a> <a href=\"/projects.html\" class=navbar-item>Projects</a> <a href=\"/documents.html\" class=navbar-item>Documents</a> </div> </div> </nav>")))
+#+end_src
+*** Markdown
+#+begin_src emacs-lisp
+(require 'ox-md)
+#+end_src
+*** Man
+#+begin_src emacs-lisp
+(require 'ox-man)
+#+end_src
+** Publish
+#+begin_src emacs-lisp
+(require 'ox-publish)
+(setq org-publish-project-alist '(
+("website-pages"
+ :base-directory "~/code/web/org/"
+ :base-extension "org"
+ :publishing-directory "~/code/web/html/"
+ :recursive t
+ :publishing-function org-html-publish-to-html
+ :headline-levels 1
+ :html-preamble "<nav id=navbar class=nav> <div class=container style=display:flex;justify-content:space-between> <div> <a href=\"/home.html\" class=navbar-item>Home</a> <a href=\"/projects.html\" class=navbar-item>Projects</a> <a href=\"/documents.html\" class=navbar-item>Documents</a> </div> </div> </nav>"
+ :auto-sitemap t
+ :with-toc t
+ :with-author nil
+ :with-date nil
+ :with-creator t
+ :section-numbers nil
+ :sitemap-filename "sitemap.org"
+ :sitemap-title "Sitemap"
+ )
+("website-static"
+ :base-directory "~/code/web/org/"
+ :base-extension "css\\|js\\|png\\|jpg\\|gif\\|pdf\\|mp3\\|ogg\\|swf"
+ :publishing-directory "~/code/web/html/"
+ :recursive t
+ :publishing-function org-publish-attachment
+ )
+
+("website" :components ("website-pages" "website-static"))
+))
+#+end_src
+** Capture
+#+begin_src emacs-lisp
+(setq org-capture-templates
+      '(("t" "Todo" entry (file+headline "~/org/gtd.org" "Tasks")
+         "* TODO %?\n  %i\n  %a")
+        ("a" "Job Application" entry (file+headline "~/org/applications/applications.org" "Applied")
+         "** %?\nApplied on %U\n  %i\n  %a")
+        ("s" "s[mart|puid] ideas" entry (file "~/org/ideas.org")
+         "** %^{idea:}\n%?\n")
+        ("w" "Website" entry (file+datetree "~/org/websites.org")
+         "** %:annotation\n\n%i")
+        ("j" "Journal" entry (file+datetree "~/org/journal.org")
+         "* %?\nEntered on %U\n  %i\n  %a")))
+#+end_src
+** Appearance
+*** Org Bullets
+Improve the look of headers
+#+begin_src emacs-lisp
+(use-package org-superstar
+  :defer t
+  :hook org-mode
+  :config (org-superstar-mode 1)
+)
+#+end_src
+*** Images
+#+begin_src emacs-lisp
+(setq org-startup-with-inline-images t)
+(setq org-image-actual-width 300)
+;; (setq org-hide-emphasis-markers 1)
+#+end_src
+*** Faces
+#+begin_src emacs-lisp
+;; (setq org-src-fontify-natively t)
+#+end_src
+*** Other
+#+begin_src emacs-lisp
+(setopt org-hide-leading-stars t)
+;; (setq org-hide-emphasis-markers t)
+#+end_src
+https://github.com/minad/org-modern
+* Window Management
+** Tab bar
+#+begin_src emacs-lisp
+(tab-bar-mode 1)
+;; only show tabs when there is more than one
+(setopt tab-bar-show 1)
+#+end_src
+* Keybindings
+** Generic
+#+begin_src emacs-lisp
+(keymap-set help-map (kbd "M") 'consult-man)
+#+end_src
+#+begin_src emacs-lisp
+(with-eval-after-load 'evil-maps
+  ;; (define-key evil-motion-state-map (kbd "RET") nil)
+  ;; (define-key evil-motion-state-map (kbd "SPC") nil)
+  ;; (define-key evil-motion-state-map (kbd "TAB") nil)
+)
+;; This doesn't work in evil mode
+(setq org-return-follows-link t)
+(repeat-mode 1)
+(get 'dired-jump 'dired-jump-map)
+#+end_src
+** Keymaps
+*** Toggle
+#+begin_src emacs-lisp
+;; (makunbound 'ss/toggle-map)
+(defvar-keymap ss/toggle-map  :doc "Keymap for toggling things"
+  "n" '("Toggle numbers" . display-line-numbers-mode)
+  "e" '("Emphasis markers" . (lambda() (interactive) (setq org-hide-emphasis-markers (not org-hide-emphasis-markers))))
+  "k" '("center" . ss/center-in-window)
+  "b" '("bar" . menu-bar-mode)
+  "s" '("spelling" . flyspell-mode)
+  "v" '("Visual Line" . visual-line-mode)
+)
+#+end_src
+*** Org
+#+begin_src emacs-lisp
+;; (makunbound 'ss/org-map)
+(defvar-keymap ss/org-map :doc "Useful org operations"
+  "a" '("Agenda" . org-agenda)
+  "c" '("Capture" . org-capture)
+  "e" '("Export to PDF" . "\C-c\C-elo" )
+  "t" '("Tangle" . org-babel-tangle)
+  "h" '("Heading" . consult-org-heading)
+  "p" '("Publish" . org-publish)
+  "P" '("Publish all" . org-publish-all)
+)
+#+end_src
+*** Find
+#+begin_src emacs-lisp
+;; (makunbound 'ss/find-map)
+(defvar-keymap ss/find-map :doc "Find aka consult"
+  "f" '("File" . consult-find)
+  "F" '("File(original)" . find-file)
+  "r" '("Recent" . recentf-open)
+  "b" '("Buffer" . consult-buffer)
+)
+#+end_src
+*** Git
+#+begin_src emacs-lisp
+;; (makunbound 'ss/git-map)
+(defvar-keymap ss/git-map :doc "Git"
+  "m" '("Magit" . magit)
+  "g" '("Magit" . magit)
+  "d" '("Dispatch" . magit-dispatch)
+  "s" '("Stage Hunk" . diff-hl-stage-dwim)
+  "u" '("Unstage Hunk" . diff-hl-revert-hunk)
+  "S" '("Stage File" . magit-stage)
+)
+#+end_src
+*** Buffer
+#+begin_src emacs-lisp
+;; (makunbound 'ss/buffer-map)
+(defvar-keymap ss/buffer-map :doc "buffer operations"
+  "f" '("Find" . consult-buffer)
+  "b" '("Find" . consult-buffer)
+  "n" '("Next" . next-buffer)
+  "p" '("Previous" . previous-buffer)
+  "d" '("Delete" . evil-delete-buffer)
+  "m" '("Menu" . list-buffers)
+  "k" '("Kill" . kill-this-buffer)
+)
+#+end_src
+*** Language
+#+begin_src emacs-lisp
+;; (makunbound 'ss/lang-map)
+(defvar-keymap ss/lang-map :doc "LSP keymap"
+  "s" '("Start" . eglot)
+  "S" '("Stop" . eglot-shutdown)
+  "r" '("Rename" . eglot-rename)
+  "a" '("Action" . eglot-code-actions)
+  "i" '("Toggle Inlays" . eglot-inlay-hints-mode)
+)
+#+end_src
+#+begin_src emacs-lisp :tangle no
+;; (makunbound 'ss/lang-map)
+(defvar-keymap ss/lang-map :doc "LSP keymap"
+  "s" '("Start" . eglot)
+  "S" '("Stop" . eglot-shutdown)
+  "r" '("Rename" . eglot-rename)
+  "a" '("Action" . eglot-code-action)
+  "i" '("Toggle Inlays" . eglot-inlay-hints-mode)
+)
+#+end_src
+*** Elisp
+#+begin_src emacs-lisp
+;; (makunbound 'ss/elisp-map)
+(defvar-keymap ss/elisp-map :doc "Elisp"
+  "i" '("interactive" . ielm)
+  ;; "c" '("config" . lambda () () )
+)
+#+end_src
+*** Window
+#+begin_src emacs-lisp
+;; (makunbound 'ss/window-map)
+;; (defvar-keymap ss/window-map 
+;; :repeat t
+;;   "w" #'evil-window-next
+;;   "W" #'evil-window-prev
+;;   "h" #'evil-window-left
+;;   "j" #'evil-window-down
+;;   "k" #'evil-window-up
+;;   "l" #'evil-window-right
+;;   "H" #'evil-window-move-far-left
+;;   "J" #'evil-window-move-very-bottom
+;;   "K" #'evil-window-move-very-top
+;;   "L" #'evil-window-move-far-right
+;;   "s" #'evil-window-split
+;;   "S" #'evil-window-split
+;;   "v" #'evil-window-vsplit
+;;   "V" #'evil-window-vsplit
+;;   "o" #'delete-other-windows
+;;   "O" #'delete-other-windows
+;;   "c" #'evil-window-delete
+;;   "C" #'evil-window-delete
+;;   "b" #'evil-window-bottom-right
+;;   "f" #'ffap-other-window
+;;   "t" #'evil-window-top-left
+;;   "x" #'evil-window-exchange
+;;   "t" #'tab-window-detach
+;;   "+" #'evil-window-increase-height
+;;   "-" #'evil-window-decrease-height
+;;   "_" #'evil-window-set-height
+;;   "<" #'evil-window-decrease-width
+;;   ">" #'evil-window-increase-width
+;;   "=" #'balance-windows
+;;   "|" #'evil-window-set-width
+;; )
+#+end_src
+#+begin_src emacs-lisp
+(require 'ffap)
+(transient-define-prefix ss/window-manager ()
+  "menu for managing window keymaps"
+  ["window operations"
+   :description "window operations"
+   ["switching between windows"
+    :description "switch"
+    ("w" "next"         evil-window-next         :transient t)
+    ("W" "prev"         evil-window-prev         :transient t)
+    ("h" "left"         evil-window-left         :transient t)
+    ("j" "down"         evil-window-down         :transient t)
+    ("k" "up"           evil-window-up           :transient t)
+    ("l" "right"        evil-window-right        :transient t)
+    ("b" "bottom right" evil-window-bottom-right :transient t)
+    ("t" "top left"     evil-window-top-left     :transient t)]
+
+   ["editing layout"
+    :description "edit layout"
+    ("H" "move left"  evil-window-move-far-left    :transient t)
+    ("J" "move down"  evil-window-move-very-bottom :transient t)
+    ("K" "move up"    evil-window-move-very-top    :transient t)
+    ("L" "move right" evil-window-move-far-right   :transient t)
+    ("x" "exchange"   evil-window-exchange         :transient t)]
+
+   ["resize"
+    :description "resize windows"
+    ("=" "balance windows" balance-windows             :transient t)
+    ("+" "increase height" evil-window-increase-height :transient t)
+    ("-" "decrease height" evil-window-decrease-height :transient t)
+    ("_" "set height"      evil-window-set-height      :transient t)
+    ("<" "decrease width"  evil-window-decrease-width  :transient t)
+    (">" "increase width"  evil-window-increase-width  :transient t)
+    ("|" "set width"       evil-window-set-width       :transient t)]
+
+   ["open/close windows"
+    :description "open/close windows"
+    ("c" "close"             evil-window-delete    :transient t)
+    ("o" "only this window"  delete-other-windows  :transient t)
+    ("n" "new"               evil-window-new       :transient t)
+    ("v" "vertical split"    evil-window-vsplit    :transient t)
+    ("s" "horizontal split"  evil-window-split     :transient t)]
+
+   ["etc"
+    :description "etc"
+    ("f" "find file other window" ffap-other-window    :transient t)
+    ("T" "detach window to tab"   tab-window-detach    :transient t)
+    ("q"        "Quit" (lambda () (interactive) (message "quit")) :transient nil)]
+ ]
+)
+#+end_src
+*** Project
+#+begin_src emacs-lisp :tangle no
+;; (makunbound 'ss/project-map)
+(defvar-keymap ss/project-map :doc "Project"
+  "i" '("interactive" . ielm)
+  ;; "c" '("config" . lambda () () )
+)
+#+end_src
+*** Start
+#+begin_src emacs-lisp
+;; (makunbound 'ss/start-map)
+(defvar-keymap ss/start-map :doc "Start"
+  "t" '("terminal" . vterm)
+  ;; "c" '("config" . lambda () () )
+)
+#+end_src
+** Leader
+#+begin_src emacs-lisp
+(evil-set-leader 'normal (kbd "SPC"))
+(evil-set-leader nil (kbd "M-SPC"))
+;; (makunbound 'ss/leader-map)
+(defvar-keymap ss/leader-map  :doc "Leader map"
+  "t" (cons "Toggle"  ss/toggle-map)
+  "o" (cons "Org"  ss/org-map)
+  "f" (cons "Find"  ss/find-map)
+  "g" (cons "Git"  ss/git-map)
+  "b" (cons "Buffer"  ss/buffer-map)
+  "l" (cons "LSP"  ss/lang-map)
+  "e" (cons "Eval"  ss/elisp-map)
+  "p" (cons "Project"  projectile-command-map)
+  "s" (cons "Start"  ss/start-map)
+  "SPC" '("Find" . consult-buffer)
+  "/" '("grep" . consult-ripgrep)
+  "j" '("Jump to Directory" . dired-jump)
+  "w" '("Window" . ss/window-manager)
+  "m" '("Mark" . bookmark-set)
+  "'" '("Jump to mark" . bookmark-jump)
+  "`" '("Consult mark" . consult-bookmark)
+  "C-M-Q" '("Kill Emacs" . kill-emacs)
+  "C-u" '("universal argument" . universal-argument)
+)
+(evil-define-key '(normal visual) 'global (kbd "<leader>") (cons "Leader"  ss/leader-map))
+#+end_src
+** Other
+#+begin_src emacs-lisp
+(evil-define-key '(normal visual) 'global (kbd "]d") 'flymake-goto-next-error)
+(evil-define-key '(normal visual) 'global (kbd "[d") 'flymake-goto-prev-error)
+(evil-define-key 'normal 'global (kbd "C-;") (kbd "A; <escape>"));
+#+end_src
+** Fixes
+Remap where space is used elsewhere
+#+begin_src emacs-lisp
+(put 'dired-jump 'repeat-map nil)
+;; Space will be remapped
+(evil-define-key 'normal 'Info-mode-map (kbd "C-SPC") 'Info-scroll-up)
+;; This maps the key universally (add-hook 'Info-mode-hook (lambda()(evil-define-key 'normal 'global (kbd "C-SPC") 'Info-scroll-up)) )
+
+;; For use in normal mode in evil
+;; (evil-define-key 'normal 'org-mode-map (kbd "RET") 'org-open-at-point)
+  (evil-collection-define-key 'normal 'org-mode-map (kbd "RET") 'org-open-at-point)
+#+end_src
+* UI
+** Modeline
+Doom Modeline
+
+Note that some of this confi involves enabling existing modules
+#+begin_src emacs-lisp
+(use-package doom-modeline
+  :ensure t
+  :init
+  (doom-modeline-mode 1)
+  ;; (display-battery-mode 1)
+  ;; (display-time-mode 1)
+  (column-number-mode 1)
+  :config
+  (setq doom-modeline-height 16
+        doom-modeline-bar-width 0
+        doom-modeline-indent-info t
+        doom-modeline-modal-modern-icon nil)
+  ;; (setq nerd-icons-scale-factor 1.1)
+  (setq doom-modeline-modal-icon nil)
+)
+;; (use-package powerline
+;;   :config
+;;   (powerline-vim-theme)
+;;   )
+#+end_src
+** Line Numbers Mode
+#+begin_src emacs-lisp
+(setq-default display-line-numbers-type 'relative)
+;; (global-display-line-numbers-mode 1)
+(dolist (mode '(prog-mode-hook
+         text-mode-hook))
+         (add-hook mode (lambda () (display-line-numbers-mode 1))))
+(dolist (mode '(
+           org-mode-hook
+           ))
+         (add-hook mode (lambda () (display-line-numbers-mode 0)))
+         )
+#+end_src
+** Highlight line
+Disabled, interferes with rainbow mode and also not that useful
+#+begin_src emacs-lisp
+;; (global-hl-line-mode)
+#+end_src
+** Fringe
+#+begin_src emacs-lisp
+(set-fringe-mode '(8 . 4))
+#+end_src
+** TODO Centering
+Center the text using margins
+#+begin_src emacs-lisp
+(setq-default ss/center-width 80)
+
+(defun ss/add-margins(&optional margin-width)
+"Add margins to both sides, defaults to margin width 0"
+(interactive "")
+  (if margin-width
+    (setq left-margin-width margin-width
+      right-margin-width margin-width)
+    (setq left-margin-width 0
+      right-margin-width 0))
+  (set-window-buffer (selected-window) (current-buffer))
+)
+
+(defun ss/set-center-width(center-width)
+"Set the width of the text in the window for centering purposes"
+(interactive "nWidth:")
+  (setq ss/center-width center-width)
+)
+
+(defun ss/center-in-window()
+"Use margins to center the columns"
+(interactive "")
+(let((margin-width (/ (- (+ (window-text-width) left-margin-width right-margin-width) ss/center-width) 2)))
+  ;;(message "margin width: %n", margin-width)
+  (if (> margin-width 0)
+    (ss/add-margins margin-width)
+    (ss/add-margins)
+    )))
+#+end_src
+#+begin_src emacs-lisp
+(window-text-width)
+#+end_src
+** Scrolling
+[[info:emacs#Auto Scrolling][Auto Scrolling]]
+Set scroll to be less jarring
+#+begin_src emacs-lisp
+(setopt scroll-conservatively 10000
+      scroll-step 1
+      ;; pixel-scroll-precision-mode t
+      ;; fast-but-imprecise-scrolling t
+      scroll-margin 4 ;; similar to scrolloff in vim
+      hscroll-step 1 ;; similar to scrolloff in vim
+      hscroll-margin 4 ;; for horizontal scroll
+)
+#+end_src
+Scroll left and right
+[[https://www.emacswiki.org/emacs/TruncateLines][emacswiki]]
+#+begin_src emacs-lisp
+;; (defun mouse-scroll-left (interactive) (if truncate-lines (scroll-right 1)))
+;; (defun mouse-scroll-right (interactive) (if truncate-lines (scroll-left 1)))
+;; (global-set-key (kbd "<mouse-6>") 'mouse-scroll-left)
+;; (global-set-key (kbd "<mouse-7>") 'mouse-scroll-right)
+;; (global-set-key (kbd "<wheel-left>") 'mouse-scroll-left)
+;; (global-set-key (kbd "<wheel-right>") 'mouse-scroll-right)
+#+end_src
+** Spelling
+#+begin_src emacs-lisp
+(add-hook 'text-mode-hook #'flyspell-mode)
+(add-hook 'prog-mode-hook #'flyspell-prog-mode)
+#+end_src
+** Wrap
+Do not wrap lines, truncate them
+#+begin_src emacs-lisp
+(set-default 'truncate-lines t)
+#+end_src
+** Pulse
+Derived from meain's original function.
+#+begin_src emacs-lisp
+(defun ss/evil-yank-advice (orig-fn beg end &optional type &rest args)
+  (if (not (eq type 'block))
+    (pulse-momentary-highlight-region beg end)
+    ;; Unfortunataly, pulse does not allow multiple overlays at once.
+    ;; (progn
+    ;;   (dolist (overlay evil-visual-block-overlays) (overlay-put overlay 'pulse-delete t))
+    ;;   (dolist (overlay evil-visual-block-overlays) (pulse-momentary-highlight-overlay (copy-overlay overlay)))
+  )
+  (apply orig-fn beg end type args)
+)
+(advice-add 'evil-yank :around 'ss/evil-yank-advice)
+#+end_src
+** Evil Registers and Marks
+#+begin_src emacs-lisp
+(defun ss/evil-register-advice (orig-fn &optional register)
+(interactive)
+(if (not register) (evil-show-registers nil))
+(condition-case error
+  (let ((reg (or register (evil-read-key "reg:" ))))
+     (evil-list-view-quit)
+     (apply orig-fn (list reg)))
+  ((error quit)
+    (if (equal (buffer-name (current-buffer)) "*evil-registers*") (evil-list-view-quit)))
+))
+
+(advice-add 'evil-use-register :around 'ss/evil-register-advice)
+;; (advice-remove 'evil-use-register 'ss/evil-register-advice)
+(advice-add 'evil-paste-from-register :around 'ss/evil-register-advice)
+;; (advice-remove 'evil-paste-from-register 'ss/evil-register-advice)
+;; (advice-add 'evil-record-macro :around 'ss/evil-register-advice)
+;; (advice-remove 'evil-record-macro 'ss/evil-register-advice)
+#+end_src
+#+begin_src emacs-lisp :tangle no
+;; (defun ss/evil-macro-advice (orig-fn count &optional macro)
+;; ;; copied from evil
+;; (interactive
+;;   (list (cond
+;;           ((and current-prefix-arg (numberp current-prefix-arg)) current-prefix-arg)
+;;           (current-prefix-arg 0)
+;;           (t 1))))
+;; (if (not macro) (evil-show-registers nil))
+;; (condition-case error
+;;   (let ((reg (or macro (evil-read-key "reg:" ))))
+;;      (evil-list-view-quit)
+;;      (apply orig-fn (list count reg)))
+;;   ((error quit)
+;;     (if (equal (buffer-name (current-buffer)) "*evil-registers*") (evil-list-view-quit)))
+;; ))
+
+;; (advice-add 'evil-execute-macro :around 'ss/evil-macro-advice)
+;; (advice-remove 'evil-execute-macro 'ss/evil-macro-advice)
+#+end_src
+#+begin_src emacs-lisp :tangle no
+(defun ss/evil-goto-mark-advice (orig-fn &optional mark noerror)
+(interactive)
+(if (not mark) (evil-show-marks nil))
+(condition-case error
+(let ((mark (or mark (read-char "mark:" ))))
+   (evil-list-view-quit)
+   (apply orig-fn (list mark)))
+  ((error quit)
+    (if (equal (buffer-name (current-buffer)) "*evil-marks*") (evil-list-view-quit)))
+))
+(advice-add 'evil-goto-mark :around 'ss/evil-goto-mark-advice)
+;; (advice-remove 'evil-goto-mark 'ss/evil-goto-mark-advice)
+(advice-add 'evil-goto-mark-line :around 'ss/evil-goto-mark-advice)
+;; (advice-remove 'evil-goto-mark-line 'ss/evil-goto-mark-advice)
+#+end_src
+#+begin_src emacs-lisp
+#+end_src
+** Color Code
+Rainbow mode may need to be installed seperately from a clean install
+#+begin_src emacs-lisp
+(require 'rainbow-mode)
+(add-hook 'text-mode-hook #'rainbow-mode)
+(add-hook 'prog-mode-hook #'rainbow-mode)
+#+end_src
+** Other
+*** Turn off noise
+#+begin_src emacs-lisp
+(setq frame-resize-pixelwise t)
+(scroll-bar-mode -1)
+(tool-bar-mode -1)
+(blink-cursor-mode 0)
+(menu-bar-mode -1)
+#+end_src
+*** Startup
+#+begin_src emacs-lisp
+(setq inhibit-startup-message t
+initial-scratch-message nil
+initial-buffer-choice "~")
+#+end_src
+*** Y/N
+If yes or no gets too annoying
+#+begin_src emacs-lisp
+;; (setopt use-short-answers t)
+#+end_src
+* Appearance Tweaks
+** Theme
+#+begin_src emacs-lisp
+(use-package zenburn-theme
+  :ensure nil
+  :custom
+  (zenburn-override-colors-alist
+        '(
+          ("zenburn-bg-2"  . "#000000")
+          ("zenburn-bg-1"  . "#000000")
+          ("zenburn-bg-08"  . "#000000")
+          ("zenburn-bg-05"  . "#000000")
+          ("zenburn-bg"    . "#080808")
+          ("zenburn-bg+05" . "#141414")
+          ("zenburn-bg+1"  . "#222222")
+          ("zenburn-bg+2"  . "#3F3F3F")
+          ("zenburn-bg+3"  . "#4F4F4F")))
+  :init
+  ;; use variable-pitch fonts for some headings and titles
+  (setq zenburn-use-variable-pitch t)
+  ;; scale headings in org-mode
+  (setq zenburn-scale-org-headlines t)
+  ;; scale headings in outline-mode
+  (setq zenburn-scale-outline-headlines t)
+  (load-theme 'zenburn t)
+  (set-face-attribute 'region nil :extend t :background "gray24")
+  ;; (set-face-attribute 'mode-line-active :background "white")
+  ;; :hook
+  ;; ((server-after-make-frame . (lambda () (setq zenburn-use-variable-pitch t))))
+)
+;; (load-theme 'modus-vivendi)
+#+end_src
+** Transparency
+#+begin_src emacs-lisp
+(set-frame-parameter nil 'alpha-background 80)
+(add-to-list 'default-frame-alist '(alpha-background . 80))
+#+end_src
+#+begin_src emacs-lisp
+(defun ss/frame-type-handler (frame)
+"handle different types of frames"
+  (cond
+  ((eq 't (framep frame))
+  (set-frame-parameter frame 'background-color "#000000"))
+))
+(add-hook 'after-make-frame-functions 'ss/frame-type-handler)
+(ss/frame-type-handler (selected-frame))
+#+end_src
+** Faces
+#+begin_src emacs-lisp
+(set-face-attribute 'default nil :font "monospace" :height 90)
+(set-face-attribute 'variable-pitch nil :font "sans-serif")
+(set-face-attribute 'info-title-1 nil :font "sans-serif" :height 150)
+(set-face-attribute 'info-title-2 nil :font "sans-serif" :height 140)
+(set-face-attribute 'info-title-3 nil :font "sans-serif" :height 130)
+(set-face-attribute 'info-title-4 nil :font "sans-serif" :height 120)
+(set-face-attribute 'info-node nil :font "sans-serif" :height 90)
+
+(set-face-attribute 'fringe nil :background "black")
+(set-face-attribute 'line-number nil :background "black")
+(set-face-attribute 'mode-line-active nil :background "#333333" :foreground "#AFE2AF")
+#+end_src
+
+* Etc
+** Custom
+Don't pollute the main file
+[[file:custom-auto.el][custom file]]
+#+begin_src emacs-lisp
+(setq custom-file (locate-user-emacs-file "custom-auto.el"))
+(load custom-file 'noerror 'nomessage)
+#+end_src
+** Disabled
+#+begin_src emacs-lisp
+
+;; Other packages: Ivy, ivy-rich, helpful
+
+;;(save-place-mode 1)
+;; (defun nmap )
+
+#+end_src
+** TODO Future Steps
+CAS, Calc is great, but there are things it can't do.
+- [[https://maxima.sourceforge.io/project.html][maxima, a CAS written in Lisp]]
+- FriCAS
+- Octave
