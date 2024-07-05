@@ -1,0 +1,18 @@
+#+title: Dotfiles
+#+description: the dotfiles of ss7241
+
+Do with this what you will
+* Installation
+Requires
+- git
+- stow
+- make
+This collection of dotfiles uses =gnu stow= and =make= to "automatically" deploy my dotfiles to the correct locations.
+* Software I currently use
+- Emacs
+- lf
+- dunst
+- neovim
+- Alacritty
+- zsh
+* Other Software
