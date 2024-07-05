@@ -1,0 +1,35 @@
+[colors.primary]
+background = "#000000"
+foreground = "#c5c8c6"
+
+[env]
+TERM = "alacritty"
+
+[font]
+size = 8.0
+
+# [font.bold]
+# family = "JetBrainsMono NF"
+# style = "Bold"
+#
+# [font.bold_italic]
+# family = "JetBrainsMono NF"
+# style = "Bold Italic"
+#
+# [font.italic]
+# family = "JetBrainsMono NF"
+# style = "Italic"
+#
+# [font.normal]
+# family = "JetBrainsMono NF"
+# style = "Regular"
+
+[window]
+decorations = "full"
+dynamic_title = true
+opacity = 0.85
+title = "Alacritty"
+
+[window.padding]
+x = 4
+y = 4
