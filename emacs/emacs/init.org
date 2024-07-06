@@ -103,19 +103,26 @@ Use this to do window management better
 ** Git
 *** TODO Magit
 A git interface
-Figure out how this works better.
+Figure out how this works better so I can actually configure it.
 #+begin_src emacs-lisp
 (use-package magit
   )
 #+end_src
 *** diff-hl
+A package for highlighting and manipulating diffs/changes
+
+[[https://github.com/syohex/emacs-git-gutter][git-gutter]] may also work
 #+begin_src emacs-lisp
 (use-package diff-hl
   :init
   (global-diff-hl-mode)
-  (diff-hl-dired-mode 1)
+  ;; (diff-hl-dired-mode 1)
   (diff-hl-flydiff-mode 1)
-)
+  ;; (diff-hl-margin-mode 1)
+  :hook ((dired-mode . diff-hl-dired-mode)
+         (magit-pre-refresh . diff-hl-magit-pre-refresh)
+         (magit-post-refresh . diff-hl-magit-post-refresh)
+))
 #+end_src
 ** TODO Other
 *** DONE Projectile
@@ -421,7 +428,7 @@ Shadow mode i.e. new path without deleting old path
 (add-hook 'rfn-eshadow-update-overlay-hook #'vertigo-directory-tidy)
 #+end_src
 
-*wdired*
+*** wdired
 #+begin_src emacs-lisp
 (setq wdired-use-interactive-rename t
       wdired-confirm-overwrite t
@@ -757,6 +764,10 @@ Improve the look of headers
 ;; (setq org-hide-emphasis-markers t)
 #+end_src
 https://github.com/minad/org-modern
+** Protocol
+#+begin_src emacs-lisp :tangle no
+(require 'org-protocol)
+#+end_src
 * Window Management
 ** Tab bar
 #+begin_src emacs-lisp
@@ -1212,8 +1223,8 @@ Derived from meain's original function.
 Rainbow mode may need to be installed seperately from a clean install
 #+begin_src emacs-lisp
 (require 'rainbow-mode)
-(add-hook 'text-mode-hook #'rainbow-mode)
-(add-hook 'prog-mode-hook #'rainbow-mode)
+(add-hook 'fundamental-mode-hook #'rainbow-mode)
+;; (add-hook 'prog-mode-hook #'rainbow-mode)
 #+end_src
 ** Other
 *** Turn off noise
