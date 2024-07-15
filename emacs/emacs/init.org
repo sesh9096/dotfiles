@@ -77,7 +77,7 @@ A collection of key bindings similar to evil mode for all the modes
   :config
   (evil-collection-init)
   :custom
-  (evil-collection-key-blacklist '("SPC"))
+  (evil-collection-key-blacklist '("M-SPC"))
 )
 #+end_src
 ** Which Key
@@ -524,7 +524,7 @@ You can delete a surrounding with ds<textobject>.
 
 ** Whitespace
 #+begin_src emacs-lisp
-(setq whitespace-style '(face tabs tab-mark trailing))
+(setq whitespace-style '(face tabs tab-mark trailing missing-newline-at-eof))
 (custom-set-faces
  '(whitespace-tab ((t (:foreground "#636363" :background "#111111")))))
 (setq whitespace-display-mappings
@@ -1012,6 +1012,27 @@ https://github.com/minad/org-modern
 )
 (evil-define-key '(normal visual) 'global (kbd "<leader>") (cons "Leader"  ss/leader-map))
 #+end_src
+** Text Objects
+#+begin_src emacs-lisp
+;; this macro was copied from here: https://stackoverflow.com/a/22418983/4921402
+(defmacro define-and-bind-quoted-text-object (name key start-regex end-regex)
+  (let ((inner-name (make-symbol (concat "evil-inner-" name)))
+        (outer-name (make-symbol (concat "evil-a-" name))))
+    `(progn
+       (evil-define-text-object ,inner-name (count &optional beg end type)
+         (evil-select-paren ,start-regex ,end-regex beg end type count nil))
+       (evil-define-text-object ,outer-name (count &optional beg end type)
+         (evil-select-paren ,start-regex ,end-regex beg end type count t))
+       (define-key evil-inner-text-objects-map ,key #',inner-name)
+       (define-key evil-outer-text-objects-map ,key #',outer-name))))
+
+(define-and-bind-quoted-text-object "pipe" "|" "|" "|")
+(define-and-bind-quoted-text-object "slash" "/" "/" "/")
+(define-and-bind-quoted-text-object "asterisk" "*" "*" "*")
+(define-and-bind-quoted-text-object "dollar" "$" "\\$" "\\$") ;; sometimes your have to escape the regex
+(define-and-bind-quoted-text-object "inline-math" "\\(" "\\\\(" "\\\\)")
+#+end_src
+
 ** Other
 #+begin_src emacs-lisp
 (evil-define-key '(normal visual) 'global (kbd "]d") 'flymake-goto-next-error)
@@ -1222,8 +1243,12 @@ Derived from meain's original function.
 ** Color Code
 Rainbow mode may need to be installed seperately from a clean install
 #+begin_src emacs-lisp
-(require 'rainbow-mode)
-(add-hook 'fundamental-mode-hook #'rainbow-mode)
+(use-package rainbow-mode
+  :hook
+  ((prog-mode . rainbow-mode)
+   ;; (mode-hook . rainbow-mode)
+   (text-mode . rainbow-mode))
+)
 ;; (add-hook 'prog-mode-hook #'rainbow-mode)
 #+end_src
 ** Other

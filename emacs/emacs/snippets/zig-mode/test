@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: test
+# key: test
+# --
+test "${1:test name}" {
+    try ${0:expression};
+}
