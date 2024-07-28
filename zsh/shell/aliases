@@ -1,0 +1,44 @@
+#!/bin/bash
+
+alias ls='ls --color=auto'
+alias la='ls -A --color=auto'
+alias ll='ls -lAh --color=auto'
+
+alias cp='cp -iv'
+alias mv='mv -iv'
+alias rm='rm -iv'
+alias mkdir='mkdir -pv'
+
+alias grep='grep --color=auto'
+alias ip='ip --color=auto'
+
+alias hibernate='i3lock -c 101010 && systemctl hibernate'
+
+alias aijl='$HOME/venv/bin/jupyter-lab'
+alias aijn='$HOME/venv/bin/jupyter-notebook'
+alias vjl='$HOME/venv/bin/jupyter-lab'
+alias vjn='$HOME/venv/bin/jupyter-notebook'
+alias vpython='$HOME/venv/bin/python'
+alias vpip='$HOME/venv/bin/pip'
+
+alias ucbvpn='nmcli connection up --ask UCB\ VPN'
+
+alias patchcleanup='trash *.orig *.rej'
+
+alias starti3='startx $HOME/.config/X11/starti3'
+alias startdwm='startx $HOME/.config/X11/startdwm'
+alias startbspwm='startx $HOME/.config/X11/startbspwm'
+
+# alias please='sudo !!'
+# alias please="sudo $(fc -ln -1)"
+# alias ssha='ssh -i /home/ss7241/.ssh/saclass sesh9096@100.64.61.1'
+# alias sshb='ssh -i /home/ss7241/.ssh/saclass sesh9096@100.64.61.2'
+# alias sshc='ssh -i /home/ss7241/.ssh/saclass sesh9096@100.64.61.3'
+# alias sshd='ssh -i /home/ss7241/.ssh/saclass sesh9096@100.64.61.4'
+# alias sshf='ssh -i /home/ss7241/.ssh/saclass sesh9096@100.64.61.6'
+# alias sshx='ssh -i /home/ss7241/.ssh/saclass sesh9096@100.64.61.7'
+# alias sshe='ssh -i /home/ss7241/.ssh/saclass -J sesh9096@100.64.61.1 sesh9096@10.21.32.2'
+# alias ssh1='ssh student@10.224.76.11'
+# alias ssh2='ssh student@10.224.79.168'
+
+alias ssho='ssh -i /home/ss7241/.ssh/oraclecloud ubuntu@129.146.173.34'

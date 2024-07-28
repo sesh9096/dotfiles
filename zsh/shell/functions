@@ -1,0 +1,43 @@
+#! bin/sh
+# Change working dir in shell to last dir in lf on exit (adapted from ranger).
+#
+# You need to either copy the content of this file to your shell rc file
+# (e.g. ~/.bashrc) or source this file directly:
+#
+#     LFCD="/path/to/lfcd.sh"
+#     if [ -f "$LFCD" ]; then
+#         source "$LFCD"
+#     fi
+#
+# You may also like to assign a key (Ctrl-O) to this command:
+#
+#     bind '"\C-o":"lfcd\C-m"'  # bash
+#     bindkey -s '^o' 'lfcd\n'  # zsh
+#
+
+lfcd () {
+    # `command` is needed in case `lfcd` is aliased to `lf`
+    cd "$(command lf -print-last-dir "$@")"
+}
+please () {
+    sudo "$(fc -ln -1)"
+}
+ef () {
+    file="$(fzf)"
+    [ -n "$file" ] && "$EDITOR" "$file"
+}
+vterm_printf() {
+    if [ -n "$TMUX" ] && ([ "${TERM%%-*}" = "tmux" ] || [ "${TERM%%-*}" = "screen" ]); then
+        # Tell tmux to pass the escape sequences through
+        printf "\ePtmux;\e\e]%s\007\e\\" "$1"
+    elif [ "${TERM%%-*}" = "screen" ]; then
+        # GNU screen (screen, screen-256color, screen-256color-bce)
+        printf "\eP\e]%s\007\e\\" "$1"
+    else
+        printf "\e]%s\e\\" "$1"
+    fi
+}
+vterm_prompt_end() {
+    vterm_printf "51;A$(whoami)@$(hostname):$(pwd)"
+}
+

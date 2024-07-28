@@ -1,0 +1,23 @@
+#!/bin/sh
+export XDG_DATA_HOME="$HOME/.local/share"
+export XDG_CONFIG_HOME="$HOME/.config"
+export XDG_CACHE_HOME="$HOME/.cache"
+export XDG_STATE_HOME="$HOME/.local/state"
+export XDG_DATA_HOME="$HOME/.local/share"
+export HISTFILE="$XDG_STATE_HOME/shell/history"
+
+export EDITOR=nvim
+export OPENER=xdg-open
+export PAGER=less
+export BROWSER=firefox
+export LFS=/mnt/lfs
+export CARGO_HOME="$XDG_DATA_HOME"/cargo
+export GRADLE_USER_HOME="$XDG_DATA_HOME"/gradle
+export _JAVA_AWT_WM_NONREPARENTING=1
+export PATH="$HOME/.local/bin:$PATH"
+
+# hack to work around gtk theme not working
+export GTK_THEME=Arc:dark
+# https://pubs.opengroup.org/onlinepubs/9699919799/utilities/V3_chap02.html#tag_18_06_02
+
+ZDOTDIR=~/in/projects/dotfiles/zsh/shell
