@@ -45,7 +45,7 @@ Interactive repl
 #+end_src
 ** Utility packages
 #+begin_src emacs-lisp
-(use-package noflet)
+;; (use-package noflet)
 #+end_src
 * Keybinding Packages
 ** Evil
@@ -453,7 +453,7 @@ Shadow mode i.e. new path without deleting old path
 ;; (setq auto-save-list-file-prefix (expand-file-name "autosave/session/" user-emacs-directory)
 ;; auto-save-file-name-transforms `((".*" ,(expand-file-name "autosave/" user-emacs-directory))))
 #+end_src
-*** Lockfiles
+** Lockfiles
 (=.#file.txt=)
 ~(setq create-lockfiles nil)~
 ** Treemacs?
@@ -1045,6 +1045,7 @@ Remap where space is used elsewhere
 (put 'dired-jump 'repeat-map nil)
 ;; Space will be remapped
 (evil-define-key 'normal 'Info-mode-map (kbd "C-SPC") 'Info-scroll-up)
+(evil-define-key 'normal 'dired-mode-map (kbd "SPC") ss/leader-map)
 ;; This maps the key universally (add-hook 'Info-mode-hook (lambda()(evil-define-key 'normal 'global (kbd "C-SPC") 'Info-scroll-up)) )
 
 ;; For use in normal mode in evil
