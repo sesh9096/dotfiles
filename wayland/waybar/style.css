@@ -122,15 +122,15 @@ button:hover {
 }
 
 #clock {
-    background-color: #44524D;
+    background-color: #333333;
 }
 
 #battery {
-    background-color: #44524D;
+    background-color: #333333;
 }
 
 #battery.charging, #battery.plugged {
-    background-color: #26A65B;
+    background-color: #333333;
 }
 
 @keyframes blink {
@@ -175,24 +175,23 @@ label:focus {
 }
 
 #cpu {
-    background-color: #2ecc71;
-    color: #000000;
+    background-color: #333333;
 }
 
 #memory {
-    background-color: #9b59b6;
+    background-color: #333333;
 }
 
 #disk {
-    background-color: #964B00;
+    background-color: #333333;
 }
 
 #backlight {
-    background-color: #90b1b1;
+    background-color: #333333;
 }
 
 #network {
-    background-color: #2980b9;
+    background-color: #333333;
 }
 
 #network.disconnected {
@@ -229,11 +228,11 @@ label:focus {
 }
 
 #temperature {
-    background-color: #d05300;
+    background-color: #333333;
 }
 
 #temperature.critical {
-    background-color: #eb4d4b;
+    background-color: #820202;
 }
 
 #tray > .passive {
