@@ -17,9 +17,9 @@
 #            esac
 case "$(file -Lb --mime-type -- "$1")" in
     image/*)
-        # chafa -f sixel -s "$2x$3" --animate off --polite on "$1"
-        # ls -l $1
-        exiftool $1
+        chafa -f sixel -s "$2x$3" --animate off --polite on "$1"
+        ls -l $1
+        # exiftool $1
         ;;
     text/* | */xml | application/json | application/x-ndjson | application/javascript) bat --terminal-width "$4" --style header,header-filesize,numbers -f "$1" ;;
     # text/* | */xml | application/json | application/x-ndjson) bat -p --theme ansi --terminal-width "$(($4-2))" -f "$1" ;;

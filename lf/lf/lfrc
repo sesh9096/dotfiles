@@ -2,11 +2,11 @@
 set shell sh
 set hidden true
 set mouse true
-# set sixel true
+set sixel true
 set previewer '~/.config/lf/previewer.sh'
 set info size
 set drawbox true
-# set cleaner '~/.config/lf/cleaner.sh'
+set cleaner '~/.config/lf/cleaner.sh'
 
 # set '-eu' options for shell commands
 # These options are used to have safer shell commands. Option '-e' is used to
