@@ -20,7 +20,14 @@ waybar &
 swaybg -i ~/pictures/draw/experiment.png &
 dunst &
 nm-applet &
-
+pipewire &
+swayidle -w \
+         timeout 600 'swaylock' \
+         timeout 1200 'loginctl suspend' \
+         before-sleep 'swaylock' &
+#+end_src
+** sensible settings
+#+begin_src shell
 # Fixes for some gtk apps looking bad
 riverctl rule-add ssd
 # Note: the "Super" modifier is also known as Logo, GUI, Windows, Mod4, etc.
@@ -209,6 +216,10 @@ do
     riverctl map $mode None XF86AudioRaiseVolume  spawn 'pamixer -i 5'
     riverctl map $mode None XF86AudioLowerVolume  spawn 'pamixer -d 5'
     riverctl map $mode None XF86AudioMute         spawn 'pamixer --toggle-mute'
+    riverctl map $mode None XF86AudioRaiseVolume  spawn 'amixer set Master 5%+'
+    riverctl map $mode None XF86AudioLowerVolume  spawn 'amixer set Master 5%-'
+    riverctl map $mode None XF86AudioMute         spawn 'amixer set Master toggle'
+    riverctl map $mode None XF86AudioMicMute      spawn 'amixer set Capture toggle'
 
     # Control MPRIS aware media players with playerctl (https://github.com/altdesktop/playerctl)
     riverctl map $mode None XF86AudioMedia spawn 'playerctl play-pause'
@@ -234,4 +245,10 @@ riverctl map normal Super Return spawn foot
 riverctl map normal Super P spawn fuzzel
 riverctl map normal Super E spawn "emacsclient --alternate-editor='' --create-frame"
 
+#+end_src
+* rules
+use =lswt= to get app-id's
+#+begin_src shell
+riverctl rule-add -app-id nm-openconnect-auth-dialog float
+riverctl rule-add -app-id nm-connection-editor float
 #+end_src
