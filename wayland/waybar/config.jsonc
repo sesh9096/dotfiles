@@ -22,13 +22,24 @@
         "network",
         // "power-profiles-daemon",
         "memory",
-        "cpu",
-        "temperature",
         "backlight",
+        "group/power",
         "battery",
         "clock",
         "tray"
     ],
+    "group/power": {
+        "orientation": "inherit",
+        "drawer": {
+            "transition-duration": 500,
+            "children-class": "not-power",
+            "transition-left-to-right": false,
+        },
+        "modules": [
+            "cpu",
+            "temperature"
+        ]
+    },
     // Modules configuration
     // "sway/workspaces": {
     //     "disable-scroll": true,
@@ -49,7 +60,7 @@
     "keyboard-state": {
         // "numlock": true,
         "capslock": true,
-        "format": "{name} {icon} ",
+        "format": "{icon} ",
         "format-icons": {
             "locked": "",
             "unlocked": ""
@@ -176,11 +187,10 @@
     //   }
     // },
     "network": {
-        // "interface": "wlp2*", // (Optional) To force the use of this interface
-        "format-wifi": "{essid} ({signalStrength}%) ",
+        "format-wifi": "{essid}({signalStrength}%) ",
         "format-ethernet": "{ipaddr}/{cidr} 󰈁",
         "tooltip-format": "{ifname} via {gwaddr} 󰩠",
-        "format-linked": "{ifname} (No IP) 󰤫",
+        "format-linked": "{ifname}(No IP) 󰤫",
         "format-disconnected": "Disconnected ⚠",
         "format-alt": "{ifname}: {ipaddr}/{cidr}"
     },
