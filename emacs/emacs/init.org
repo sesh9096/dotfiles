@@ -798,6 +798,7 @@ https://github.com/minad/org-modern
 (defvar-keymap ss/toggle-map  :doc "Keymap for toggling things"
   "n" '("Toggle numbers" . display-line-numbers-mode)
   "e" '("Emphasis markers" . (lambda() (interactive) (setq org-hide-emphasis-markers (not org-hide-emphasis-markers))))
+  "t" '("transparency" . (lambda () (interactive) (set-frame-parameter nil 'alpha-background (if (= 100 (frame-parameter nil 'alpha-background)) 80 100))))
   "k" '("center" . ss/center-in-window)
   "b" '("bar" . menu-bar-mode)
   "s" '("spelling" . flyspell-mode)
@@ -1044,8 +1045,8 @@ Remap where space is used elsewhere
 #+begin_src emacs-lisp
 (put 'dired-jump 'repeat-map nil)
 ;; Space will be remapped
-(evil-define-key 'normal 'Info-mode-map (kbd "C-SPC") 'Info-scroll-up)
-(evil-define-key 'normal 'dired-mode-map (kbd "SPC") ss/leader-map)
+(evil-define-key 'normal Info-mode-map (kbd "C-SPC") 'Info-scroll-up)
+(evil-define-key 'normal dired-mode-map (kbd "SPC") ss/leader-map)
 ;; This maps the key universally (add-hook 'Info-mode-hook (lambda()(evil-define-key 'normal 'global (kbd "C-SPC") 'Info-scroll-up)) )
 
 ;; For use in normal mode in evil
