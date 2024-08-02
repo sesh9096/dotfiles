@@ -1,33 +1,30 @@
-# -*- eval: (add-hook 'after-save-hook 'org-babel-tangle nil t); eval: (add-hook 'after-save-hook (lambda () (chmod "~/.config/river/init" #o754)) nil t); -*-
+# -*- eval: (add-hook 'after-save-hook (lambda () (chmod "~/.config/river/init" #o755)) nil t); eval: (add-hook 'after-save-hook 'org-babel-tangle nil t); -*-
 
 #+TITLE: River Config
 #+AUTHOR: Sean Shi
 #+DESCRIPTION: the river config
 #+STARTUP: fold
 #+OPTIONS: toc:2
-#+PROPERTY: header-args:shell :tangle ~/.config/river/init :results silent :session riversession
+#+PROPERTY: header-args:sh :tangle ~/.config/river/init :results silent :session riversession :shebang #!/bin/sh
 
 * preamble
 ** header
-#+begin_src shell
-#!/bin/sh
+#+begin_src sh
+
 # See the river(1), riverctl(1), and rivertile(1) man pages for complete
 # documentation.
 #+end_src
 ** starting apps
-#+begin_src shell
+#+begin_src sh
 waybar &
 swaybg -i ~/pictures/draw/experiment.png &
 dunst &
 nm-applet &
 pipewire &
-swayidle -w \
-         timeout 600 'swaylock' \
-         timeout 1200 'loginctl suspend' \
-         before-sleep 'swaylock' &
+swayidle -w
 #+end_src
 ** sensible settings
-#+begin_src shell
+#+begin_src sh
 # Fixes for some gtk apps looking bad
 riverctl rule-add ssd
 # Note: the "Super" modifier is also known as Logo, GUI, Windows, Mod4, etc.
@@ -37,7 +34,7 @@ riverctl set-repeat 50 300
 riverctl focus-follows-cursor normal
 #+end_src
 ** colors
-#+begin_src shell
+#+begin_src sh
 # Set background and border color
 # riverctl background-color 0x000000
 riverctl border-color-focused 0xa3b1b1
@@ -45,7 +42,7 @@ riverctl border-color-unfocused 0x283e45
 riverctl border-color-urgent 0x700000
 #+end_src
 * Window management
-#+begin_src shell
+#+begin_src sh
 # Super+Q to close the focused view
 riverctl map normal Super Q close
 
@@ -138,7 +135,7 @@ riverctl map normal Super F toggle-fullscreen
 
 #+end_src
 * rivertile
-#+begin_src shell
+#+begin_src sh
 
 # Set the default layout generator to be rivertile and start it.
 # River will send the process group of the init executable SIGTERM on exit.
@@ -191,7 +188,7 @@ riverctl rule-add -app-id "bar" csd
 # rivercarro -outer-gaps 0 -per-tag &
 #+end_src
 * Passthrough(disable bindings)
-#+begin_src shell
+#+begin_src sh
 # Declare a passthrough mode. This mode has only a single mapping to return to
 # normal mode. This makes it useful for testing a nested wayland compositor
 riverctl declare-mode passthrough
@@ -202,9 +199,9 @@ riverctl map normal Super F11 enter-mode passthrough
 # Super+F11 to return to normal mode
 riverctl map passthrough Super F11 enter-mode normal
 #+end_src
-* Media Keys
-#+begin_src shell
-
+* keybindings
+** Media Keys
+#+begin_src sh
 # Various media key mapping examples for both normal and locked mode which do
 # not have a modifier
 for mode in normal locked
@@ -238,17 +235,22 @@ do
     riverctl map $mode Super F4   spawn 'loginctl hibernate'
 done
 #+end_src
-* hotkeys
-#+begin_src shell
+Lock on sleep key and lock key
+#+begin_src sh
+riverctl map normal None XF86Sleep       spawn 'swaylock'
+riverctl map normal None XF86ScreenSaver spawn 'swaylock'
+#+end_src
+** hotkeys
+#+begin_src sh
 # Super+Return to start an instance of foot (https://codeberg.org/dnkl/foot)
 riverctl map normal Super Return spawn foot
 riverctl map normal Super P spawn fuzzel
+riverctl map normal Super+Control P spawn "fuzzel --list-executables-in-path"
 riverctl map normal Super E spawn "emacsclient --alternate-editor='' --create-frame"
-
 #+end_src
 * rules
 use =lswt= to get app-id's
-#+begin_src shell
+#+begin_src sh
 riverctl rule-add -app-id nm-openconnect-auth-dialog float
 riverctl rule-add -app-id nm-connection-editor float
 #+end_src
