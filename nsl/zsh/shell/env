@@ -20,4 +20,4 @@ export PATH="$HOME/.local/bin:$PATH"
 export GTK_THEME=Arc:dark
 # https://pubs.opengroup.org/onlinepubs/9699919799/utilities/V3_chap02.html#tag_18_06_02
 
-ZDOTDIR=~/in/projects/dotfiles/zsh/shell
+ZDOTDIR=~/in/projects/dotfiles/nsl/zsh/shell

@@ -1,7 +1,11 @@
-default:
-	stow emacs alacritty git fontconfig dunst lf
+default: wayland emacs
+	stow alacritty git fontconfig dunst lf nvim
 
-# wayland:
+all: defualt
+	stow alacritty bspwm dunst emacs fontconfig git i3 lf
+
+wayland:
+	stow wayland
 
 # xorg:
 

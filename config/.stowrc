@@ -1,0 +1,5 @@
+--target=~/.config/
+--ignore=.stowrc
+--ignore=etc
+--ignore=Makefile
+--ignore=river
