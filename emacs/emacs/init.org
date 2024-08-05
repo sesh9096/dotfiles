@@ -727,15 +727,15 @@ Consider switching to engraved?
 ** Capture
 #+begin_src emacs-lisp
 (setq org-capture-templates
-      '(("t" "Todo" entry (file+headline "~/org/gtd.org" "Tasks")
+      '(("t" "Todo" entry (file+headline "~/in/org/gtd.org" "Tasks")
          "* TODO %?\n  %i\n  %a")
-        ("a" "Job Application" entry (file+headline "~/org/applications/applications.org" "Applied")
+        ("a" "Job Application" entry (file+headline "~/in/org/applications/applications.org" "Applied")
          "** %?\nApplied on %U\n  %i\n  %a")
-        ("s" "s[mart|puid] ideas" entry (file "~/org/ideas.org")
+        ("s" "s[mart|puid] ideas" entry (file "~/in/org/ideas.org")
          "** %^{idea:}\n%?\n")
-        ("w" "Website" entry (file+datetree "~/org/websites.org")
+        ("w" "Website" entry (file+datetree "~/in/org/websites.org")
          "** %:annotation\n\n%i")
-        ("j" "Journal" entry (file+datetree "~/org/journal.org")
+        ("j" "Journal" entry (file+datetree "~/in/org/journal.org")
          "* %?\nEntered on %U\n  %i\n  %a")))
 #+end_src
 ** Appearance
