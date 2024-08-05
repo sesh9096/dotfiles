@@ -21,7 +21,7 @@ swaybg -i ~/pictures/draw/experiment.png &
 dunst &
 nm-applet &
 pipewire &
-swayidle -w
+swayidle -w &
 #+end_src
 ** sensible settings
 #+begin_src sh
@@ -187,6 +187,41 @@ riverctl rule-add -app-id "bar" csd
 # riverctl default-layout rivercarro
 # rivercarro -outer-gaps 0 -per-tag &
 #+end_src
+* scratchpad
+Taken from
+https://codeberg.org/river/wiki/src/branch/master/pages/Scratchpad-and-Sticky.md
+#+begin_src sh
+# The scratchpad will live on an unused tag. Which tags are used depends on your
+# config, but rivers default uses the first 9 tags.
+scratch_tag=$((1 << 20 ))
+
+# Toggle the scratchpad with Super+Minus
+riverctl map normal Super Minus toggle-focused-tags ${scratch_tag}
+
+# Send windows to the scratchpad with Super+Shift+Minus
+riverctl map normal Super+Shift Minus set-view-tags ${scratch_tag}
+
+# Set spawn tagmask to ensure new windows don't have the scratchpad tag unless
+# explicitly set.
+all_tags=$(((1 << 32) - 1))
+all_but_scratch_tag=$(( $all_tags ^ $scratch_tag ))
+riverctl spawn-tagmask ${all_but_scratch_tag}
+
+sticky_tag=$((1 << 31))
+all_but_sticky_tag=$(( $all_tags ^ $sticky_tag ))
+
+riverctl map normal Super S toggle-view-tags $sticky_tag
+riverctl spawn-tagmask ${all_but_sticky_tag}
+
+# modify the normal keybind to always select the sticky tag
+for i in $(seq 1 9)
+do
+    tags=$((1 << ($i - 1)))
+    # Super+[1-9] to focus tag [0-8]
+    riverctl map normal Super $i set-focused-tags $(($sticky_tag + $tags))
+done
+
+#+end_src
 * Passthrough(disable bindings)
 #+begin_src sh
 # Declare a passthrough mode. This mode has only a single mapping to return to
@@ -235,11 +270,17 @@ do
     riverctl map $mode Super F4   spawn 'loginctl hibernate'
 done
 #+end_src
-Lock on sleep key and lock key
+*** Lock on sleep key and lock key
 #+begin_src sh
 riverctl map normal None XF86Sleep       spawn 'swaylock'
 riverctl map normal None XF86ScreenSaver spawn 'swaylock'
 #+end_src
+*** screenshots
+#+begin_src sh
+riverctl map normal Super Print       spawn 'grim; notify-send "captured screenshot"'
+riverctl map normal Control Print     spawn 'grim -g "$(slurp)"'
+#+end_src
+
 ** hotkeys
 #+begin_src sh
 # Super+Return to start an instance of foot (https://codeberg.org/dnkl/foot)
