@@ -1,0 +1,5 @@
+show-failed-attempts
+daemonize
+ignore-empty-password
+indicator-radius=90
+image=pictures/wallpaper/Lock.png
