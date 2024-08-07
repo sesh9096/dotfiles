@@ -42,4 +42,4 @@ alias startbspwm='startx $HOME/.config/X11/startbspwm'
 # alias ssh2='ssh student@10.224.79.168'
 
 alias ssho='ssh -i /home/ss/.ssh/oraclecloud ubuntu@129.146.173.34'
-alias ssha='ssh sesh9096@admin3.rc.int.colorado.edu'
+alias ssha='TERM=xterm-256color ssh sesh9096@admin3.rc.int.colorado.edu'

@@ -15,7 +15,7 @@ export CARGO_HOME="$XDG_DATA_HOME"/cargo
 export GRADLE_USER_HOME="$XDG_DATA_HOME"/gradle
 export _JAVA_AWT_WM_NONREPARENTING=1
 export PATH="$HOME/.local/bin:$PATH"
-export MANPATH="$HOME/.local/man:/usr/local/share/man:/usr/share/man"
+export MANPATH="$HOME/.local/share/man:/usr/local/share/man:/usr/share/man"
 
 # hack to work around gtk theme not working
 # export GTK_THEME=Arc:dark
