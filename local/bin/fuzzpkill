@@ -1,0 +1,20 @@
+#!/bin/sh
+
+process="$(ps --User=ss -o 'comm' |\
+       tail -n+2 |\
+       sort -u |\
+       fuzzel --dmenu \
+              --background=200000d8 \
+              --border-color=b00000e8 \
+              --border-width=3 \
+              --font=monospace:size=12 \
+              --width=80 \
+              --prompt='pkill=>' |\
+       awk '{ print $1 }')" 2> /dev/null
+if [ -n "$process" ];then
+	echo "killing ${process}"
+	pkill $process
+else
+	echo "no process selected"
+	exit 1
+fi

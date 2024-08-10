@@ -1,0 +1,19 @@
+#!/bin/sh
+
+pid="$(ps --User=ss -o 'pid command stat bsdtime stime rss %mem' |\
+       tail -n+2 |\
+       fuzzel --dmenu \
+              --background=200000d8 \
+              --border-color=b00000e8 \
+              --border-width=3 \
+              --font=monospace:size=12 \
+              --width=80 \
+              --prompt='kill=>' |\
+       awk '{ print $1 }')" 2> /dev/null
+if [ -n "$pid" ];then
+	echo "killing ${pid}"
+	kill $pid
+else
+	echo "no process selected"
+	exit 1
+fi

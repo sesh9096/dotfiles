@@ -288,6 +288,8 @@ riverctl map normal Super Return spawn foot
 riverctl map normal Super P spawn fuzzel
 riverctl map normal Super+Control P spawn "fuzzel --list-executables-in-path"
 riverctl map normal Super E spawn "emacsclient --alternate-editor='' --create-frame"
+riverctl map normal Super X spawn "fuzzpkill"
+riverctl map normal Super+Shift X spawn "fuzzkill"
 #+end_src
 * rules
 use =lswt= to get app-id's
