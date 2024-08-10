@@ -988,8 +988,8 @@ https://github.com/minad/org-modern
 #+end_src
 ** Leader
 #+begin_src emacs-lisp
-(evil-set-leader 'normal (kbd "SPC"))
-(evil-set-leader nil (kbd "M-SPC"))
+(evil-set-leader '(normal visual) (kbd "SPC"))
+(evil-set-leader nil (kbd "M-SPC")) 
 ;; (makunbound 'ss/leader-map)
 (defvar-keymap ss/leader-map  :doc "Leader map"
   "t" (cons "Toggle"  ss/toggle-map)
@@ -1011,7 +1011,19 @@ https://github.com/minad/org-modern
   "C-M-Q" '("Kill Emacs" . kill-emacs)
   "C-u" '("universal argument" . universal-argument)
 )
-(evil-define-key '(normal visual) 'global (kbd "<leader>") (cons "Leader"  ss/leader-map))
+(evil-define-key 'normal 'global (kbd "<leader>") (cons "Leader"  ss/leader-map))
+(evil-define-key 'insert 'global (kbd "<leader>") (cons "Leader"  ss/leader-map))
+#+end_src
+*** Visual Mode Leader
+#+begin_src emacs-lisp
+;; (makunbound 'ss/visual-leader-map)
+(defvar-keymap ss/visual-leader-map  :doc "Visual Leader map"
+  "p" '("paste without losing selection" . "\"_dP")
+  "y" '("yank to clipbard" . "\"+y")
+  "C-M-Q" '("Kill Emacs" . kill-emacs)
+  "C-u" '("universal argument" . universal-argument)
+)
+(evil-define-key 'visual 'global (kbd "<leader>") (cons "Leader"  ss/visual-leader-map))
 #+end_src
 ** Text Objects
 #+begin_src emacs-lisp
