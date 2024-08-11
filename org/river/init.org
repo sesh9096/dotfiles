@@ -42,6 +42,7 @@ riverctl border-color-unfocused 0x283e45
 riverctl border-color-urgent 0x700000
 #+end_src
 * Window management
+** close
 #+begin_src sh
 # Super+Q to close the focused view
 riverctl map normal Super Q close
@@ -49,15 +50,9 @@ riverctl map normal Super Q close
 # Super+Control+Shift+Q to exit river
 riverctl map normal Super+Control+Shift Q exit
 
-# Super+J and Super+K to focus the next/previous view in the layout stack
-riverctl map normal Super J focus-view next
-riverctl map normal Super K focus-view previous
-
-# Super+Shift+J and Super+Shift+K to swap the focused view with the next/previous
-# view in the layout stack
-riverctl map normal Super+Shift J swap next
-riverctl map normal Super+Shift K swap previous
-
+#+end_src
+** monitors
+#+begin_src sh
 # Super+Period and Super+Comma to focus the next/previous output
 riverctl map normal Super Period focus-output next
 riverctl map normal Super Comma focus-output previous
@@ -66,17 +61,9 @@ riverctl map normal Super Comma focus-output previous
 riverctl map normal Super+Shift Period send-to-output next
 riverctl map normal Super+Shift Comma send-to-output previous
 
-# Super+Shift+Return to bump the focused view to the top of the layout stack
-riverctl map normal Super+Shift Return zoom
-
-# Super+H and Super+L to decrease/increase the main ratio of rivertile(1)
-riverctl map normal Super H send-layout-cmd rivertile "main-ratio -0.05"
-riverctl map normal Super L send-layout-cmd rivertile "main-ratio +0.05"
-
-# Super+Shift+H and Super+Shift+L to increment/decrement the main count of rivertile(1)
-riverctl map normal Super+Shift H send-layout-cmd rivertile "main-count +1"
-riverctl map normal Super+Shift L send-layout-cmd rivertile "main-count -1"
-
+#+end_src
+** float
+#+begin_src sh
 # Super+Alt+{H,J,K,L} to move views
 riverctl map normal Super+Alt H move left 100
 riverctl map normal Super+Alt J move down 100
@@ -104,6 +91,12 @@ riverctl map-pointer normal Super BTN_RIGHT resize-view
 # Super + Middle Mouse Button to toggle float
 riverctl map-pointer normal Super BTN_MIDDLE toggle-float
 
+# Super+Space to toggle float
+riverctl map normal Super Space toggle-float
+
+#+end_src
+** tags
+#+begin_src sh
 for i in $(seq 1 9)
 do
     tags=$((1 << ($i - 1)))
@@ -127,15 +120,35 @@ all_tags=$(((1 << 32) - 1))
 riverctl map normal Super 0 set-focused-tags $all_tags
 riverctl map normal Super+Shift 0 set-view-tags $all_tags
 
-# Super+Space to toggle float
-riverctl map normal Super Space toggle-float
-
+#+end_src
+** other
+#+begin_src sh
 # Super+F to toggle fullscreen
 riverctl map normal Super F toggle-fullscreen
 
+# Super+Shift+Return to bump the focused view to the top of the layout stack
+riverctl map normal Super+Shift Return zoom
+
 #+end_src
-* rivertile
-#+begin_src sh
+** layout generator
+*** rivertile
+#+begin_src sh :tangle no
+# Super+J and Super+K to focus the next/previous view in the layout stack
+riverctl map normal Super J focus-view next
+riverctl map normal Super K focus-view previous
+
+# Super+Shift+J and Super+Shift+K to swap the focused view with the next/previous
+# view in the layout stack
+riverctl map normal Super+Shift J swap next
+riverctl map normal Super+Shift K swap previous
+
+# Super+H and Super+L to decrease/increase the main ratio of rivertile(1)
+riverctl map normal Super H send-layout-cmd rivertile "main-ratio -0.05"
+riverctl map normal Super L send-layout-cmd rivertile "main-ratio +0.05"
+
+# Super+Shift+H and Super+Shift+L to increment/decrement the main count of rivertile(1)
+riverctl map normal Super+Shift H send-layout-cmd rivertile "main-count +1"
+riverctl map normal Super+Shift L send-layout-cmd rivertile "main-count -1"
 
 # Set the default layout generator to be rivertile and start it.
 # River will send the process group of the init executable SIGTERM on exit.
@@ -152,42 +165,43 @@ riverctl map normal Super Left  send-layout-cmd rivertile "main-location left"
 # Make all views with an app-id that starts with "float" and title "foo" start floating.
 riverctl rule-add -app-id 'float*' -title 'org capture' float
 
-# Make all views with app-id "bar" and any title use client-side decorations
-riverctl rule-add -app-id "bar" csd
-
-# # Mod+H and Mod+L to decrease/increase the main ratio of rivercarro
-# riverctl map normal $mod H send-layout-cmd rivercarro "main-ratio -0.05"
-# riverctl map normal $mod L send-layout-cmd rivercarro "main-ratio +0.05"
-
-# # Mod+Shift+H and Mod+Shift+L to increment/decrement the main count of rivercarro
-# riverctl map normal $mod+Shift H send-layout-cmd rivercarro "main-count +1"
-# riverctl map normal $mod+Shift L send-layout-cmd rivercarro "main-count -1"
-
-# # Mod+{Up,Right,Down,Left} to change layout orientation
-# riverctl map normal $mod Up    send-layout-cmd rivercarro "main-location top"
-# riverctl map normal $mod Right send-layout-cmd rivercarro "main-location right"
-# riverctl map normal $mod Down  send-layout-cmd rivercarro "main-location bottom"
-# riverctl map normal $mod Left  send-layout-cmd rivercarro "main-location left"
-# # And for monocle
-# riverctl map normal $mod M     send-layout-cmd rivercarro "main-location monocle"
-# # Cycle through layout
-# riverctl map normal $mod W     send-layout-cmd rivercarro "main-location-cycle left,monocle"
-
-# # Add others rivercarro's commands the same way with the keybinds you'd like.
-# # e.g.
-# # riverctl map normal $mod <keys> send-layout-cmd rivercarro "inner-gaps -1"
-# # riverctl map normal $mod <keys> send-layout-cmd rivercarro "inner-gaps +1"
-# # riverctl map normal $mod <keys> send-layout-cmd rivercarro "outer-gaps -1"
-# # riverctl map normal $mod <keys> send-layout-cmd rivercarro "outer-gaps +1"
-# # riverctl map normal $mod <keys> send-layout-cmd rivercarro "width-ratio -0.1"
-# # riverctl map normal $mod <keys> send-layout-cmd rivercarro "width-ratio +0.1"
-
-# # Set the default layout generator to be rivercarro and start it.
-# # River will send the process group of the init executable SIGTERM on exit.
-# riverctl default-layout rivercarro
-# rivercarro -outer-gaps 0 -per-tag &
 #+end_src
-* scratchpad
+*** rivercarro
+#+begin_src sh
+mod=Super
+# Mod+H and Mod+L to decrease/increase the main ratio of rivercarro
+riverctl map normal $mod H send-layout-cmd rivercarro "main-ratio -0.05"
+riverctl map normal $mod L send-layout-cmd rivercarro "main-ratio +0.05"
+
+# Mod+Shift+H and Mod+Shift+L to increment/decrement the main count of rivercarro
+riverctl map normal $mod+Shift H send-layout-cmd rivercarro "main-count +1"
+riverctl map normal $mod+Shift L send-layout-cmd rivercarro "main-count -1"
+
+# Mod+{Up,Right,Down,Left} to change layout orientation
+riverctl map normal $mod Up    send-layout-cmd rivercarro "main-location top"
+riverctl map normal $mod Right send-layout-cmd rivercarro "main-location right"
+riverctl map normal $mod Down  send-layout-cmd rivercarro "main-location bottom"
+riverctl map normal $mod Left  send-layout-cmd rivercarro "main-location left"
+# And for monocle
+riverctl map normal $mod M     send-layout-cmd rivercarro "main-location monocle"
+# Cycle through layout
+riverctl map normal $mod W     send-layout-cmd rivercarro "main-location-cycle left,monocle"
+
+# Add others rivercarro's commands the same way with the keybinds you'd like.
+# e.g.
+# riverctl map normal $mod <keys> send-layout-cmd rivercarro "inner-gaps -1"
+# riverctl map normal $mod <keys> send-layout-cmd rivercarro "inner-gaps +1"
+# riverctl map normal $mod <keys> send-layout-cmd rivercarro "outer-gaps -1"
+# riverctl map normal $mod <keys> send-layout-cmd rivercarro "outer-gaps +1"
+# riverctl map normal $mod <keys> send-layout-cmd rivercarro "width-ratio -0.1"
+# riverctl map normal $mod <keys> send-layout-cmd rivercarro "width-ratio +0.1"
+
+# Set the default layout generator to be rivercarro and start it.
+# River will send the process group of the init executable SIGTERM on exit.
+riverctl default-layout rivercarro
+rivercarro -per-tag &
+#+end_src
+** scratchpad/sticky
 Taken from
 https://codeberg.org/river/wiki/src/branch/master/pages/Scratchpad-and-Sticky.md
 #+begin_src sh
@@ -245,9 +259,9 @@ do
     riverctl map $mode None XF86Eject spawn 'eject -T'
 
     # Control pulse audio volume with pamixer (https://github.com/cdemoulins/pamixer)
-    riverctl map $mode None XF86AudioRaiseVolume  spawn 'pamixer -i 5'
-    riverctl map $mode None XF86AudioLowerVolume  spawn 'pamixer -d 5'
-    riverctl map $mode None XF86AudioMute         spawn 'pamixer --toggle-mute'
+    # riverctl map $mode None XF86AudioRaiseVolume  spawn 'pamixer -i 5'
+    # riverctl map $mode None XF86AudioLowerVolume  spawn 'pamixer -d 5'
+    # riverctl map $mode None XF86AudioMute         spawn 'pamixer --toggle-mute'
     riverctl map $mode None XF86AudioRaiseVolume  spawn 'amixer set Master 5%+'
     riverctl map $mode None XF86AudioLowerVolume  spawn 'amixer set Master 5%-'
     riverctl map $mode None XF86AudioMute         spawn 'amixer set Master toggle'
