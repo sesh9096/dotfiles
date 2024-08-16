@@ -131,8 +131,7 @@ riverctl map normal Super+Shift Return zoom
 
 #+end_src
 ** layout generator
-*** rivertile
-#+begin_src sh :tangle no
+#+begin_src sh
 # Super+J and Super+K to focus the next/previous view in the layout stack
 riverctl map normal Super J focus-view next
 riverctl map normal Super K focus-view previous
@@ -141,7 +140,10 @@ riverctl map normal Super K focus-view previous
 # view in the layout stack
 riverctl map normal Super+Shift J swap next
 riverctl map normal Super+Shift K swap previous
+#+end_src
 
+*** rivertile
+#+begin_src sh :tangle no
 # Super+H and Super+L to decrease/increase the main ratio of rivertile(1)
 riverctl map normal Super H send-layout-cmd rivertile "main-ratio -0.05"
 riverctl map normal Super L send-layout-cmd rivertile "main-ratio +0.05"
@@ -292,7 +294,8 @@ riverctl map normal None XF86ScreenSaver spawn 'swaylock'
 *** screenshots
 #+begin_src sh
 riverctl map normal Super Print       spawn 'grim; notify-send "captured screenshot"'
-riverctl map normal Control Print     spawn 'grim -g "$(slurp)"'
+riverctl map normal Control Print     spawn 'grim -g "$(slurp)"; notify-send "captured screenshot"'
+riverctl map normal Alt+Control Print spawn 'grim -g "$(slurp -p)" -t ppm - | magick - -format '%[pixel:p{0,0}]' txt:- | tail -n 1 | cut -d " " -f 4 | wl-copy ; notify-send "copied color $(wl-paste) to clipboard"'
 #+end_src
 
 ** hotkeys
@@ -306,8 +309,9 @@ riverctl map normal Super X spawn "fuzzpkill"
 riverctl map normal Super+Shift X spawn "fuzzkill"
 #+end_src
 * rules
-use =lswt= to get app-id's
+use =lswt= to get app-id's and names
 #+begin_src sh
 riverctl rule-add -app-id nm-openconnect-auth-dialog float
 riverctl rule-add -app-id nm-connection-editor float
+riverctl rule-add -title zoom float
 #+end_src

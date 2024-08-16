@@ -356,6 +356,7 @@ Other options:
 #+begin_src emacs-lisp
 (use-package markdown-mode
   :ensure t
+  :defer t
   :mode ("README\\.md\\'" . gfm-mode)
   :init (setq markdown-command "multimarkdown"))
 #+end_src
@@ -375,7 +376,7 @@ Other options:
 (setq org-plantuml-jar-path "/usr/share/java/plantuml/plantuml.jar")
 #+end_src
 ** c
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 #+end_src
 ** zig
 #+begin_src emacs-lisp
@@ -522,6 +523,15 @@ You can delete a surrounding with ds<textobject>.
 (setq backward-delete-char-untabify-method 'hungry)
 #+end_src
 
+Disable for selective modes
+#+begin_src emacs-lisp
+;; turn off tabs in org mode
+(dolist (mode '(org-mode-hook
+                emacs-lisp-mode-hook
+                lisp-mode-hook))
+  (add-hook mode (lambda () (indent-tabs-mode -1))))
+#+end_src
+
 ** Whitespace
 #+begin_src emacs-lisp
 (setq whitespace-style '(face tabs tab-mark trailing missing-newline-at-eof))
@@ -649,11 +659,6 @@ Nice syntax highlighting
 ;; technically not necessary with the line above
 (setq org-edit-src-content-indentation 0)
 #+end_src
-#+begin_src emacs-lisp
-;; turn off tabs in org mode
-(add-hook 'org-mode-hook (lambda () (indent-tabs-mode -1)))
-#+end_src
-
 ** Commands
 Allows for auto-tangling this file
 #+begin_src emacs-lisp
@@ -697,9 +702,9 @@ Consider switching to engraved?
 (require 'ox-publish)
 (setq org-publish-project-alist '(
 ("website-pages"
- :base-directory "~/code/web/org/"
+ :base-directory "~/in/projects/web/org/"
  :base-extension "org"
- :publishing-directory "~/code/web/html/"
+ :publishing-directory "~/in/projects/web/html/"
  :recursive t
  :publishing-function org-html-publish-to-html
  :headline-levels 1
@@ -714,9 +719,9 @@ Consider switching to engraved?
  :sitemap-title "Sitemap"
  )
 ("website-static"
- :base-directory "~/code/web/org/"
+ :base-directory "~/in/projects/web/org/"
  :base-extension "css\\|js\\|png\\|jpg\\|gif\\|pdf\\|mp3\\|ogg\\|swf"
- :publishing-directory "~/code/web/html/"
+ :publishing-directory "~/in/projects/web/html/"
  :recursive t
  :publishing-function org-publish-attachment
  )
@@ -737,6 +742,10 @@ Consider switching to engraved?
          "** %:annotation\n\n%i")
         ("j" "Journal" entry (file+datetree "~/in/org/journal.org")
          "* %?\nEntered on %U\n  %i\n  %a")))
+#+end_src
+** Agenda
+#+begin_src emacs-lisp
+(setopt org-agenda-files '("~/in/org/"))
 #+end_src
 ** Appearance
 *** Org Bullets
@@ -798,7 +807,7 @@ https://github.com/minad/org-modern
 (defvar-keymap ss/toggle-map  :doc "Keymap for toggling things"
   "n" '("Toggle numbers" . display-line-numbers-mode)
   "e" '("Emphasis markers" . (lambda() (interactive) (setq org-hide-emphasis-markers (not org-hide-emphasis-markers))))
-  "t" '("transparency" . (lambda () (interactive) (set-frame-parameter nil 'alpha-background (if (= 100 (frame-parameter nil 'alpha-background)) 80 100))))
+  "a" '("alpha" . (lambda () (interactive) (set-frame-parameter nil 'alpha-background (if (= 100 (frame-parameter nil 'alpha-background)) 80 100))))
   "k" '("center" . ss/center-in-window)
   "b" '("bar" . menu-bar-mode)
   "s" '("spelling" . flyspell-mode)
@@ -1012,10 +1021,11 @@ https://github.com/minad/org-modern
   "C-u" '("universal argument" . universal-argument)
 )
 (evil-define-key 'normal 'global (kbd "<leader>") (cons "Leader"  ss/leader-map))
-(evil-define-key 'insert 'global (kbd "<leader>") (cons "Leader"  ss/leader-map))
+;; (evil-define-key 'insert 'global (kbd "<leader>") (cons "Leader"  ss/leader-map))
 #+end_src
 *** Visual Mode Leader
-#+begin_src emacs-lisp
+Note: look under other
+#+begin_src emacs-lisp :tangle no
 ;; (makunbound 'ss/visual-leader-map)
 (defvar-keymap ss/visual-leader-map  :doc "Visual Leader map"
   "p" '("paste without losing selection" . "\"_dP")
@@ -1050,6 +1060,8 @@ https://github.com/minad/org-modern
 #+begin_src emacs-lisp
 (evil-define-key '(normal visual) 'global (kbd "]d") 'flymake-goto-next-error)
 (evil-define-key '(normal visual) 'global (kbd "[d") 'flymake-goto-prev-error)
+(evil-define-key '(normal visual) 'global (kbd "<leader>y") (cons "yank to clipbard" "\"+y"))
+(evil-define-key 'visual 'global (kbd "<leader>p") (cons "paste without losing selection" "\"_dP"))
 (evil-define-key 'normal 'global (kbd "C-;") (kbd "A; <escape>"));
 #+end_src
 ** Fixes
@@ -1057,7 +1069,8 @@ Remap where space is used elsewhere
 #+begin_src emacs-lisp
 (put 'dired-jump 'repeat-map nil)
 ;; Space will be remapped
-(evil-define-key 'normal Info-mode-map (kbd "C-SPC") 'Info-scroll-up)
+(evil-define-key 'normal Info-mode-map (kbd "C-SPC") 'Info-scroll-down)
+;; (evil-define-key 'normal Info-mode-map (kbd "S-SPC") 'Info-scroll-down)
 (evil-define-key 'normal dired-mode-map (kbd "SPC") ss/leader-map)
 ;; This maps the key universally (add-hook 'Info-mode-hook (lambda()(evil-define-key 'normal 'global (kbd "C-SPC") 'Info-scroll-up)) )
 
@@ -1119,31 +1132,39 @@ Center the text using margins
 (setq-default ss/center-width 80)
 
 (defun ss/add-margins(&optional margin-width)
-"Add margins to both sides, defaults to margin width 0"
-(interactive "")
+  "Add margins to both sides, defaults to margin width 0"
+  (interactive "")
   (if margin-width
-    (setq left-margin-width margin-width
-      right-margin-width margin-width)
+      (setq left-margin-width margin-width
+            right-margin-width margin-width)
     (setq left-margin-width 0
-      right-margin-width 0))
-  (set-window-buffer (selected-window) (current-buffer))
-)
+          right-margin-width 0))
+  (set-window-buffer (selected-window) (current-buffer)))
 
 (defun ss/set-center-width(center-width)
-"Set the width of the text in the window for centering purposes"
-(interactive "nWidth:")
-  (setq ss/center-width center-width)
-)
+  "Set the width of the text in the window for centering purposes"
+  (interactive "nWidth:")
+  (setq ss/center-width center-width))
 
 (defun ss/center-in-window()
-"Use margins to center the columns"
-(interactive "")
-(let((margin-width (/ (- (+ (window-text-width) left-margin-width right-margin-width) ss/center-width) 2)))
-  ;;(message "margin width: %n", margin-width)
-  (if (> margin-width 0)
-    (ss/add-margins margin-width)
-    (ss/add-margins)
-    )))
+  "Use margins to center the columns"
+  (interactive "")
+  (let((margin-width (/ (- (+ (window-text-width) left-margin-width right-margin-width) ss/center-width) 2)))
+    ;;(message "margin width: %n", margin-width)
+    (if (> margin-width 0)
+        (ss/add-margins margin-width)
+      (ss/add-margins))))
+
+(define-minor-mode ss/center-in-window-mode
+  "Toggle center in window mode
+Interactively with no argument, this command toggles the mode.
+A positive prefix argument enables the mode, any other prefix
+argument disables it.  From Lisp, argument omitted or nil enables
+the mode, `toggle' toggles the state.
+
+When this mode is enabled, text will be centerd with respect to
+\\[ss/center-width]"
+  )
 #+end_src
 #+begin_src emacs-lisp
 (window-text-width)
@@ -1260,9 +1281,9 @@ Rainbow mode may need to be installed seperately from a clean install
 (use-package rainbow-mode
   :hook
   ((prog-mode . rainbow-mode)
+   (conf-mode . rainbow-mode)
    ;; (mode-hook . rainbow-mode)
-   (text-mode . rainbow-mode))
-)
+   (text-mode . rainbow-mode)))
 ;; (add-hook 'prog-mode-hook #'rainbow-mode)
 #+end_src
 ** Other
