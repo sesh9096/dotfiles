@@ -26,6 +26,8 @@ Interactive repl
   (package-initialize)
 (require 'use-package)
 (setq use-package-always-ensure t)
+(setq use-package-always-defer t)
+;; (setq use-package-verbose t) ;; useful for debugging
 #+end_src
 #+begin_src emacs-lisp :tangle no
 ;; when use-package has issues, may be because packages are out of date
@@ -52,7 +54,7 @@ Interactive repl
 *** Evil Mode
 #+begin_src emacs-lisp
 (use-package evil
-  :ensure t
+  :demand t
   :init
   (setq evil-want-integration t ;; This is optional since it's already set to t by default.
    evil-want-keybinding nil
@@ -72,8 +74,7 @@ A collection of key bindings similar to evil mode for all the modes
 #+begin_src emacs-lisp
 (use-package evil-collection
   :after evil
-  :ensure t
-  :init
+  :demand t
   :config
   (evil-collection-init)
   :custom
@@ -106,7 +107,7 @@ A git interface
 Figure out how this works better so I can actually configure it.
 #+begin_src emacs-lisp
 (use-package magit
-  )
+  :commands (magit magit-status))
 #+end_src
 *** diff-hl
 A package for highlighting and manipulating diffs/changes
@@ -348,15 +349,15 @@ Other options:
 ** pdf-view
 #+begin_src emacs-lisp
 (use-package pdf-tools
-  :init (pdf-tools-install)
+  :mode ("\\.pdf\\'"  . pdf-view-mode)
   :custom (pdf-view-midnight-colors '("#ffffff" . "#000000"))
+  :config (pdf-tools-install :no-query)
 )
 #+end_src
 ** markdown
 #+begin_src emacs-lisp
 (use-package markdown-mode
   :ensure t
-  :defer t
   :mode ("README\\.md\\'" . gfm-mode)
   :init (setq markdown-command "multimarkdown"))
 #+end_src
@@ -380,20 +381,21 @@ Other options:
 #+end_src
 ** zig
 #+begin_src emacs-lisp
-(use-package zig-mode)
+(use-package zig-mode
+  :mode ("\\.zig\\'" "\\.zon\\'"))
 #+end_src
 ** info
 [[info:info#Advanced][info]]
 ** vterm
 #+begin_src emacs-lisp
 (use-package vterm
-    :ensure t)
+  :commands vterm)
 #+end_src
 * Files
 ** Dired
-Emacs builtin file manager.
+The Emacs builtin file manager.
 Set this up to use more vim-like keys similar to =lf=.
-Will start with short listings by default as to not be super annoying
+*** Key Bindings
 | Mode  | Key     | purpose                               |
 |-------+---------+---------------------------------------|
 | Any   | C-x d   | launch dired in chosen directory      |
@@ -401,11 +403,59 @@ Will start with short listings by default as to not be super annoying
 | Dired | C-x C-q | make changes by directly editing info |
 | Dired | C-c C-c | commit changes                        |
 | Dired | C-c C-k | discard changes                       |
+**** Navigation
+*Emacs* / *Evil*
+- =n= / =j= - next line
+- =p= / =k= - previous line
+- =j= / =J= - jump to file in buffer
+- =RET= - select file or directory
+- =^= - go to parent directory
+- =S-RET= / =g O= - Open file in "other" window
+- =M-RET= - Show file in other window without focusing (previewing files)
+- =g o= (=dired-view-file=) - Open file but in a "preview" mode, close with =q=
+- =g= / =g r= Refresh the buffer with =revert-buffer= after changing configuration (and after filesystem changes!)
+**** Marking files
+- =m= - Marks a file
+- =u= - Unmarks a file
+- =U= - Unmarks all files in buffer
+- =* t= / =t= - Inverts marked files in buffer
+- =% m= - Mark files in buffer using regular expression
+- =*= - Lots of other auto-marking functions
+- =k= / =K= - "Kill" marked items (refresh buffer with =g= / =g r= to get them back)
+- Many operations can be done on a single file if there are no active marks!
+ 
+**** Copying and Renaming files
+- =C= - Copy marked files (or if no files are marked, the current file)
+- Copying single and multiple files
+- =U= - Unmark all files in buffer
+- =R= - Rename marked files, renaming multiple is a move!
+- =% R= - Rename based on regular expression: =^test= , =old-\&=
 
+*Power command*: =C-x C-q= (=dired-toggle-read-only=) - Makes all file names in the buffer editable directly to rename them!  Press =Z Z= to confirm renaming or =Z Q= to abort.
+
+**** Deleting files
+- =D= - Delete marked file
+- =d= - Mark file for deletion
+- =x= - Execute deletion for marks
+- =delete-by-moving-to-trash= - Move to trash instead of deleting permanently
+
+**** Creating and extracting archives
+- =Z= - Compress or uncompress a file or folder to (=.tar.gz=)
+- =c= - Compress selection to a specific file
+- =dired-compress-files-alist= - Bind compression commands to file extension
+
+**** Other common operations
+- =T= - Touch (change timestamp)
+- =M= - Change file mode
+- =O= - Change file owner
+- =G= - Change file group
+- =S= - Create a symbolic link to this file
+- =L= - Load an Emacs Lisp file into Emacs
+
+*** config
 #+begin_src emacs-lisp
 (use-package dired
   :ensure nil
-  :defer t
   :commands (dired dired-jump)
   :bind ("C-x C-j" . dired-jump)
   ;; :hook ((dired-mode . dired-hide-details-mode))
@@ -414,12 +464,13 @@ Will start with short listings by default as to not be super annoying
     "h" 'dired-up-directory
     "a" 'dired-create-directory
     "l" 'dired-find-file)
+  ;; Note: ss/leader-map is not defined until later, buit this is fine because the code is deferred
+  (evil-define-key 'normal dired-mode-map (kbd "SPC") ss/leader-map)
   :custom
   (dired-listing-switches "-ahvlD --group-directories-first")
   (delete-by-moving-to-trash t)
   (dired-dwim-target t)
-  (dired-kill-when-opening-new-dired-buffer t)
-)
+  (dired-kill-when-opening-new-dired-buffer t))
 (put 'dired-find-alternate-file 'disabled nil)
 (put 'dired-jump nil 'dired-jump-map)
 #+end_src
@@ -1071,7 +1122,6 @@ Remap where space is used elsewhere
 ;; Space will be remapped
 (evil-define-key 'normal Info-mode-map (kbd "C-SPC") 'Info-scroll-down)
 ;; (evil-define-key 'normal Info-mode-map (kbd "S-SPC") 'Info-scroll-down)
-(evil-define-key 'normal dired-mode-map (kbd "SPC") ss/leader-map)
 ;; This maps the key universally (add-hook 'Info-mode-hook (lambda()(evil-define-key 'normal 'global (kbd "C-SPC") 'Info-scroll-up)) )
 
 ;; For use in normal mode in evil
@@ -1385,8 +1435,26 @@ Don't pollute the main file
 ;; (defun nmap )
 
 #+end_src
+** Startup
+#+begin_src emacs-lisp
+(defun efs/display-startup-time ()
+  (message "Emacs started up in %s with %d garbage collections"
+           (emacs-init-time "%.3f secconds")
+           gcs-done))
+(add-hook 'emacs-startup-hook #'efs/display-startup-time)
+#+end_src
+#+begin_src emacs-lisp
+(setq gc-cons-threshold 2000000)
+#+end_src
+#+begin_src emacs-lisp :tangle no
+;; (efs/display-startup-time)
+;; (format "%.3f seconds"
+;;         (float-time
+;;          (time-subtract after-init-time before-init-time)))
+#+end_src
 ** TODO Future Steps
 CAS, Calc is great, but there are things it can't do.
 - [[https://maxima.sourceforge.io/project.html][maxima, a CAS written in Lisp]]
 - FriCAS
 - Octave
+  
