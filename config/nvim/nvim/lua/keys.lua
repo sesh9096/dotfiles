@@ -1,0 +1,31 @@
+vim.keymap.set("x", "<leader>p", [["_dP]])
+vim.keymap.set({ 'n', 'v' }, '<Space>', '<Nop>', { silent = true })
+-- vim.keymap.set("n", "<C-i>", "i_<Esc>r")
+vim.keymap.set("n", "<C-u>", "<C-u>zz")
+vim.keymap.set("n", "<C-d>", "<C-d>zz")
+vim.keymap.set("n", "n", "nzzzv")
+vim.keymap.set("n", "n", "nzzzv")
+vim.keymap.set({"n", "v"}, "<leader>y", [["+y]], { desc = 'yank to primary buffer' })
+vim.keymap.set("n", "<leader>Y", [["+Y]], { desc = 'Yank to primary buffer' })
+vim.keymap.set('n', '<leader>bp', vim.cmd.bprevious, { desc = 'Goto previous buffer' })
+vim.keymap.set('n', '<leader>bn', vim.cmd.bnext, { desc = 'Goto next buffer' })
+vim.keymap.set('n', '<leader>bd', vim.cmd.bdelete, { desc = 'Delete buffer' })
+vim.keymap.set('n', '<leader>bb', function () vim.cmd('LualineBuffersJump $') end, { desc = 'Goto recent buffer' })
+-- vim.keymap.set({ 'i' }, 'jj', '<escape>', { silent = true })
+-- vim.keymap.set({ 'i' }, '(', '()<Left>', { silent = true })
+-- vim.keymap.set({ 'i' }, '{', '{}<Left>', { silent = true })
+-- vim.keymap.set({ 'i' }, '[', '[]<Left>', { silent = true })
+
+-- Remap for dealing with word wrap
+-- vim.keymap.set('n', 'k', "v:count == 0 ? 'gk' : 'k'", { expr = true, silent = true })
+-- vim.keymap.set('n', 'j', "v:count == 0 ? 'gj' : 'j'", { expr = true, silent = true })
+
+-- Diagnostic keymaps
+vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, { desc = 'Go to previous diagnostic message' })
+vim.keymap.set('n', ']d', vim.diagnostic.goto_next, { desc = 'Go to next diagnostic message' })
+vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, { desc = 'Open floating diagnostic message' })
+vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostics list' })
+
+vim.keymap.set("v", "<C-j>", ":m '>+1<CR>gv=gv" , {desc = 'move lines down'})
+vim.keymap.set("v", "<C-k>", ":m '<-2<CR>gv=gv" , {desc = 'move lines down'})
+-- vim.keymap.set("v", "<C-j>", function () vim.cmd.move(1); vim.cmd("gv=gv")end , {desc = 'move lines down'})
