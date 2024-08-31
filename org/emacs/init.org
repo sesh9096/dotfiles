@@ -27,7 +27,7 @@ Interactive repl
 (require 'use-package)
 (setq use-package-always-ensure t)
 (setq use-package-always-defer t)
-;; (setq use-package-verbose t) ;; useful for debugging
+(setq use-package-verbose t) ;; useful for debugging
 #+end_src
 #+begin_src emacs-lisp :tangle no
 ;; when use-package has issues, may be because packages are out of date
@@ -123,6 +123,7 @@ A package for highlighting and manipulating diffs/changes
   :hook ((dired-mode . diff-hl-dired-mode)
          (magit-pre-refresh . diff-hl-magit-pre-refresh)
          (magit-post-refresh . diff-hl-magit-post-refresh)
+  ;; :custom-face 
 ))
 #+end_src
 ** TODO Other
@@ -359,7 +360,13 @@ Other options:
 (use-package markdown-mode
   :ensure t
   :mode ("README\\.md\\'" . gfm-mode)
-  :init (setq markdown-command "multimarkdown"))
+  ;; :init (setq markdown-command "multimarkdown")
+  :custom
+  (markdown-header-scaling t)
+  (markdown-header-scaling-values '(1.3 1.2 1.15 1.1 1.05 1))
+  :custom-face
+  ;; (markdown-header-face ((t (:weight normal))))
+  (markdown-header-face ((t (:font "sans-serif")))))
 #+end_src
 ** latex
 #+begin_src emacs-lisp
@@ -391,6 +398,19 @@ Other options:
 (use-package vterm
   :commands vterm)
 #+end_src
+** lua
+#+begin_src emacs-lisp
+(use-package lua-mode
+  :mode "\\.lua\\'")
+#+end_src
+** email
+#+begin_src emacs-lisp
+(add-to-list 'load-path "/usr/share/emacs/site-lisp/mu4e")
+(use-package mu4e
+  :ensure nil)
+(require 'mu4e)
+#+end_src>
+** feed
 * Files
 ** Dired
 The Emacs builtin file manager.
@@ -466,13 +486,13 @@ Set this up to use more vim-like keys similar to =lf=.
     "l" 'dired-find-file)
   ;; Note: ss/leader-map is not defined until later, buit this is fine because the code is deferred
   (evil-define-key 'normal dired-mode-map (kbd "SPC") ss/leader-map)
+  (keymap-unset dired-jump-map "j")
+  (put 'dired-find-alternate-file 'disabled nil)
   :custom
   (dired-listing-switches "-ahvlD --group-directories-first")
   (delete-by-moving-to-trash t)
   (dired-dwim-target t)
   (dired-kill-when-opening-new-dired-buffer t))
-(put 'dired-find-alternate-file 'disabled nil)
-(put 'dired-jump nil 'dired-jump-map)
 #+end_src
 Shadow mode i.e. new path without deleting old path
 #+begin_src emacs-lisp
@@ -517,8 +537,7 @@ Shadow mode i.e. new path without deleting old path
 *** rainbow delimiters
 #+begin_src emacs-lisp
 (use-package rainbow-delimiters
-  :init (add-hook 'prog-mode-hook #'rainbow-delimiters-mode)
-  )
+  :hook (prog-mode text-mode))
 #+end_src
 
 *** smartparens
@@ -545,6 +564,7 @@ You can delete a surrounding with ds<textobject>.
 #+begin_src emacs-lisp
 (use-package evil-surround
   :ensure t
+  :demand t
   :config
   (global-evil-surround-mode 1))
 #+end_src
@@ -597,6 +617,7 @@ Disable for selective modes
 Better behavior for commenting
 #+begin_src emacs-lisp
 (use-package evil-nerd-commenter
+  :demand t
   :config
   (evilnc-default-hotkeys)
   (add-hook 'c-mode-common-hook
@@ -613,12 +634,13 @@ Increment and decrement numbers
   ;; :bind
   ;;   (("C-a" . evil-numbers/inc-at-pt)
   ;;   ("C-s" . evil-numbers/dec-at-pt)) ;; C-x is taken, C-s is originally bound to isearch-forward, but / does the same thing
-  :config
-    (define-key evil-normal-state-map "\C-a" 'evil-numbers/inc-at-pt)
-    (define-key evil-normal-state-map "\C-s" 'evil-numbers/dec-at-pt)
-    (define-key evil-normal-state-map "g\C-a" 'evil-numbers/inc-at-pt-incremental)
-    (define-key evil-normal-state-map "g\C-s" 'evil-numbers/dec-at-pt-incremental)
-)
+  :bind
+  (
+   :map evil-normal-state-map
+   ("\C-a" . 'evil-numbers/inc-at-pt)
+   ("\C-s" . 'evil-numbers/dec-at-pt)
+   ( "g\C-a" . 'evil-numbers/inc-at-pt-incremental)
+   ( "g\C-s" . 'evil-numbers/dec-at-pt-incremental)))
 #+end_src
 ** Fold
 #+begin_src emacs-lisp
@@ -650,7 +672,8 @@ Increment and decrement numbers
 ** Languages
 *** Babel
 #+begin_src emacs-lisp
-(use-package ess) ; for use with R
+(use-package ess
+  :after org) ; for use with R
 #+end_src
 
 #+begin_src emacs-lisp
@@ -676,11 +699,13 @@ Nice syntax highlighting
 (require 'org-tempo)
 (dolist (cell '(("el" . "src emacs-lisp")
                ("py" . "src python")
-               ("sh" . "src shell")
+               ("sh" . "src sh")
+               ("bash" . "src bash")
+               ("shell" . "src shell")
                ("dot" . "src dot")
                ("puml" . "src plantuml")
                ("R" . "src R")))
-         (add-to-list 'org-structure-template-alist cell))
+  (add-to-list 'org-structure-template-alist cell))
 #+end_src
 *** latex
 #+begin_src emacs-lisp
@@ -822,6 +847,7 @@ Improve the look of headers
 #+begin_src emacs-lisp
 (setopt org-hide-leading-stars t)
 ;; (setq org-hide-emphasis-markers t)
+(setopt org-ellipsis nil)
 #+end_src
 https://github.com/minad/org-modern
 ** Protocol
@@ -838,7 +864,7 @@ https://github.com/minad/org-modern
 * Keybindings
 ** Generic
 #+begin_src emacs-lisp
-(keymap-set help-map (kbd "M") 'consult-man)
+(keymap-set help-map (kbd "M") 'man)
 #+end_src
 #+begin_src emacs-lisp
 (with-eval-after-load 'evil-maps
@@ -849,7 +875,6 @@ https://github.com/minad/org-modern
 ;; This doesn't work in evil mode
 (setq org-return-follows-link t)
 (repeat-mode 1)
-(get 'dired-jump 'dired-jump-map)
 #+end_src
 ** Keymaps
 *** Toggle
@@ -859,7 +884,7 @@ https://github.com/minad/org-modern
   "n" '("Toggle numbers" . display-line-numbers-mode)
   "e" '("Emphasis markers" . (lambda() (interactive) (setq org-hide-emphasis-markers (not org-hide-emphasis-markers))))
   "a" '("alpha" . (lambda () (interactive) (set-frame-parameter nil 'alpha-background (if (= 100 (frame-parameter nil 'alpha-background)) 80 100))))
-  "k" '("center" . ss/center-in-window)
+  "k" '("center" . visual-fill-column-mode)
   "b" '("bar" . menu-bar-mode)
   "s" '("spelling" . flyspell-mode)
   "v" '("Visual Line" . visual-line-mode)
@@ -1043,6 +1068,8 @@ https://github.com/minad/org-modern
 ;; (makunbound 'ss/start-map)
 (defvar-keymap ss/start-map :doc "Start"
   "t" '("terminal" . vterm)
+  "c" '("calc" . calc)
+  "m" '("mail" . mu4e)
   ;; "c" '("config" . lambda () () )
 )
 #+end_src
@@ -1159,13 +1186,11 @@ Note that some of this confi involves enabling existing modules
 (setq-default display-line-numbers-type 'relative)
 ;; (global-display-line-numbers-mode 1)
 (dolist (mode '(prog-mode-hook
-         text-mode-hook))
-         (add-hook mode (lambda () (display-line-numbers-mode 1))))
-(dolist (mode '(
-           org-mode-hook
-           ))
-         (add-hook mode (lambda () (display-line-numbers-mode 0)))
-         )
+                text-mode-hook))
+  (add-hook mode (lambda () (display-line-numbers-mode 1))))
+(dolist (mode '(org-mode-hook
+                markdown-mode-hook))
+  (add-hook mode (lambda () (display-line-numbers-mode 0))))
 #+end_src
 ** Highlight line
 Disabled, interferes with rainbow mode and also not that useful
@@ -1178,6 +1203,7 @@ Disabled, interferes with rainbow mode and also not that useful
 #+end_src
 ** TODO Centering
 Center the text using margins
+*** handrolled
 #+begin_src emacs-lisp
 (setq-default ss/center-width 80)
 
@@ -1216,8 +1242,15 @@ When this mode is enabled, text will be centerd with respect to
 \\[ss/center-width]"
   )
 #+end_src
+*** Visual fill column
 #+begin_src emacs-lisp
-(window-text-width)
+(use-package visual-fill-column
+  :custom
+  (visual-fill-column-center-text t)
+  (visual-fill-column-width nil)
+  (fill-column 80)
+  :hook (org-mode . (lambda () (setq-local visual-fill-column-width 150))))
+  :hook '(Info-mode help-mode Man-mode org-mode)
 #+end_src
 ** Scrolling
 [[info:emacs#Auto Scrolling][Auto Scrolling]]
@@ -1382,6 +1415,8 @@ If yes or no gets too annoying
   (setq zenburn-scale-outline-headlines t)
   (load-theme 'zenburn t)
   (set-face-attribute 'region nil :extend t :background "gray24")
+  ;; :custom-face
+  ;; (region ((t (:backgroud "gray24"))))
   ;; (set-face-attribute 'mode-line-active :background "white")
   ;; :hook
   ;; ((server-after-make-frame . (lambda () (setq zenburn-use-variable-pitch t))))
@@ -1395,11 +1430,11 @@ If yes or no gets too annoying
 #+end_src
 #+begin_src emacs-lisp
 (defun ss/frame-type-handler (frame)
-"handle different types of frames"
+  "handle different types of frames"
   (cond
-  ((eq 't (framep frame))
-  (set-frame-parameter frame 'background-color "#000000"))
-))
+   ((eq 't (framep frame)) (progn
+    (set-face-background 'default "unspecified-bg" frame)
+    (set-face-background 'line-number "unspecified-bg" frame)))))
 (add-hook 'after-make-frame-functions 'ss/frame-type-handler)
 (ss/frame-type-handler (selected-frame))
 #+end_src
@@ -1412,6 +1447,9 @@ If yes or no gets too annoying
 (set-face-attribute 'info-title-3 nil :font "sans-serif" :height 130)
 (set-face-attribute 'info-title-4 nil :font "sans-serif" :height 120)
 (set-face-attribute 'info-node nil :font "sans-serif" :height 90)
+;; (set-face-attribute 'org-block-begin-line nil :font "monospace" :height 80 :background "#000030")
+;; (set-face-attribute 'org-block-end-line   nil :font "monospace" :height 80 :background "#000030")
+
 
 (set-face-attribute 'fringe nil :background "black")
 (set-face-attribute 'line-number nil :background "black")
