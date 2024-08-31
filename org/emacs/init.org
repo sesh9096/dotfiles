@@ -370,12 +370,11 @@ Other options:
 #+end_src
 ** latex
 #+begin_src emacs-lisp
-;; (use-package auctex
-;;   :disabled
-;; )
-#+end_src
-#+begin_src emacs-lisp
-(use-package cdlatex)
+(use-package auctex
+  :mode ("\\.tex\\'" . LaTeX-mode))
+(use-package cdlatex
+  :hook (org-mode . turn-on-org-cdlatex)
+  :hook (LaTex-Mode . cdlatex-mode))
 #+end_src
 ** plantuml
 #+begin_src emacs-lisp
@@ -409,8 +408,24 @@ Other options:
 (use-package mu4e
   :ensure nil)
 (require 'mu4e)
-#+end_src>
-** feed
+#+end_src
+** feeds
+#+begin_src emacs-lisp
+(use-package elfeed
+  :custom
+  (elfeed-db-directory (concat (getenv "XDG_STATE_HOME") "/emacs/elfeed"))
+  :config
+  (setq elfeed-feeds
+        '(("https://voidlinux.org/atom.xml" linux)
+          ("https://crypto.katestange.net/feed" school))))
+#+end_src
+** sage
+#+begin_src emacs-lisp
+(use-package sage-shell-mode
+  :mode ("\\.sage\\'" . sage-shell:sage)
+  :config (sage-shell:define-alias)
+  :commands (sage-shell:sage-mode sage-shell:run-new-sage))
+#+end_src
 * Files
 ** Dired
 The Emacs builtin file manager.
@@ -484,8 +499,6 @@ Set this up to use more vim-like keys similar to =lf=.
     "h" 'dired-up-directory
     "a" 'dired-create-directory
     "l" 'dired-find-file)
-  ;; Note: ss/leader-map is not defined until later, buit this is fine because the code is deferred
-  (evil-define-key 'normal dired-mode-map (kbd "SPC") ss/leader-map)
   (keymap-unset dired-jump-map "j")
   (put 'dired-find-alternate-file 'disabled nil)
   :custom
@@ -600,7 +613,7 @@ Disable for selective modes
 (dolist (mode '(org-mode-hook
                 emacs-lisp-mode-hook
                 lisp-mode-hook))
-  (add-hook mode (lambda () (indent-tabs-mode -1))))
+  (add-hook mode (lambda () (indent-tabs-mode -1) (setq tab-width 8))))
 #+end_src
 
 ** Whitespace
@@ -664,76 +677,82 @@ Increment and decrement numbers
 ;; :
 ;; )
 #+end_src
-* TS
+* Treesitter
 #+begin_src emacs-lisp
 (require 'treesit)
 #+end_src
 * Org
 ** Languages
 *** Babel
+**** R
 #+begin_src emacs-lisp
 (use-package ess
   :after org) ; for use with R
 #+end_src
-
+**** sage
 #+begin_src emacs-lisp
-(org-babel-do-load-languages
- 'org-babel-load-languages
-  '((emacs-lisp . t)
-    (python . t)
-    (plantuml . t)
-    (shell . t)
-    (dot . t)
-    (R . t)))
-(setq org-confirm-babel-evaluate nil)
+(use-package ob-sagemath
+  :config
+  (setq org-babel-default-header-args:sage '((:session . t)
+                                             (:results . "output")))
+  (add-hook 'org-babel-after-execute-hook 'org-display-inline-images)
+  :after org) ; for use with R
 #+end_src
+**** loading
+#+begin_src emacs-lisp
+(with-eval-after-load "org"
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((emacs-lisp . t)
+     (python . t)
+     (plantuml . t)
+     (shell . t)
+     (dot . t)
+     (sagemath . t)
+     (R . t)))
+  (setq org-confirm-babel-evaluate nil)
+  (setq org-export-use-babel nil)
+  (add-hook 'org-babel-after-execute-hook 'org-display-inline-images))
+ #+end_src
 
 Nice syntax highlighting
 #+begin_src emacs-lisp
-  ;; (setq org-latex-listings 'engraved)
+;; (setq org-latex-listings 'engraved)
 ;;(setq org-latex-listings 'engraved)
 #+end_src
 ** Editing
 *** tempo
 #+begin_src emacs-lisp
-(require 'org-tempo)
-(dolist (cell '(("el" . "src emacs-lisp")
-               ("py" . "src python")
-               ("sh" . "src sh")
-               ("bash" . "src bash")
-               ("shell" . "src shell")
-               ("dot" . "src dot")
-               ("puml" . "src plantuml")
-               ("R" . "src R")))
-  (add-to-list 'org-structure-template-alist cell))
-#+end_src
-*** latex
-#+begin_src emacs-lisp
-;; cdlatex added under latex section
-(add-hook 'org-mode-hook #'turn-on-org-cdlatex)
+(with-eval-after-load "org"
+  (require 'org-tempo)
+  (dolist (cell '(("el" . "src emacs-lisp")
+                  ("py" . "src python")
+                  ("sh" . "src sh")
+                  ("bash" . "src bash")
+                  ("shell" . "src shell")
+                  ("dot" . "src dot")
+                  ("puml" . "src plantuml")
+                  ("sage" . "src sage")
+                  ("R" . "src R")))
+    (add-to-list 'org-structure-template-alist cell)))
 #+end_src
 *** etc
 #+begin_src emacs-lisp
 ;; (add-hook 'org-mode-hook #'visual-line-mode)
 #+end_src
 ** Format
-*** lists
 #+begin_src emacs-lisp
-(setq org-list-allow-alphabetical t
-  ;; org-list-indent-offset 1
-)
-#+end_src
-*** tabs
-#+begin_src emacs-lisp
-;; (use-package toc-org
-;; )
-#+end_src
-#+begin_src emacs-lisp
+(setq org-list-allow-alphabetical t)
+;; (use-package toc-org)
 ;; indent fix with org mode
 (setq org-src-tab-acts-natively t)
 (setq org-src-preserve-indentation t)
 ;; technically not necessary with the line above
 (setq org-edit-src-content-indentation 0)
+
+;; remove <> from syntax table becuase they are sometimes used for other purposes
+(modify-syntax-entry ?< "@" org-mode-syntax-table)
+(modify-syntax-entry ?> "@" org-mode-syntax-table)
 #+end_src
 ** Commands
 Allows for auto-tangling this file
@@ -744,38 +763,31 @@ Allows for auto-tangling this file
 ))
 #+end_src
 ** Export
-*** LaTeX
 [[help:org-latex-src-block-backend][options]]
 Consider switching to engraved?
 #+begin_src emacs-lisp
+(with-eval-after-load "org"
+  (message "loading export packages")
+  (require 'ox-publish)
+  (require 'ox-latex)
+  (require 'ox-md)
+  (require 'ox-man))
+
+  (message "configuring export packages")
 (setq org-export-allow-bind-keywords t)
-(require 'ox-latex)
 (setq org-latex-src-block-backend 'minted)
 (add-to-list 'org-latex-packages-alist '("newfloat" "minted"))
 (setq org-latex-pdf-process '("latexmk -f -shell-escape -pdf -%latex -interaction=nonstopmode -output-directory=%o %f"))
-#+end_src
-*** HTML
-#+begin_src emacs-lisp
 (setq org-html-validation-link nil
       org-html-head-include-scripts nil
       org-html-preamble t
       ;; org-html-postamble nil
       org-html-head-include-default-style nil
 )
+
+;; Publishing
 (setq org-html-postamble-format '(("en" "<p class=\"creator\">Created With %c</p> ")))
 (setq org-html-preamble-format '(("en" "<nav id=navbar class=nav> <div class=container style=display:flex;justify-content:space-between> <div> <a href=\"/home.html\" class=navbar-item>Home</a> <a href=\"/projects.html\" class=navbar-item>Projects</a> <a href=\"/documents.html\" class=navbar-item>Documents</a> </div> </div> </nav>")))
-#+end_src
-*** Markdown
-#+begin_src emacs-lisp
-(require 'ox-md)
-#+end_src
-*** Man
-#+begin_src emacs-lisp
-(require 'ox-man)
-#+end_src
-** Publish
-#+begin_src emacs-lisp
-(require 'ox-publish)
 (setq org-publish-project-alist '(
 ("website-pages"
  :base-directory "~/in/projects/web/org/"
@@ -842,12 +854,9 @@ Improve the look of headers
 *** Faces
 #+begin_src emacs-lisp
 ;; (setq org-src-fontify-natively t)
-#+end_src
-*** Other
-#+begin_src emacs-lisp
-(setopt org-hide-leading-stars t)
+(setq org-hide-leading-stars t)
 ;; (setq org-hide-emphasis-markers t)
-(setopt org-ellipsis nil)
+;; (setopt org-ellipsis nil)
 #+end_src
 https://github.com/minad/org-modern
 ** Protocol
@@ -874,7 +883,7 @@ https://github.com/minad/org-modern
 )
 ;; This doesn't work in evil mode
 (setq org-return-follows-link t)
-(repeat-mode 1)
+;; (repeat-mode 1)
 #+end_src
 ** Keymaps
 *** Toggle
@@ -920,6 +929,8 @@ https://github.com/minad/org-modern
   "m" '("Magit" . magit)
   "g" '("Magit" . magit)
   "d" '("Dispatch" . magit-dispatch)
+  "n" '("Next Hunk" . diff-hl-next-hunk)
+  "p" '("Prev Hunk" . diff-hl-previous-hunk)
   "s" '("Stage Hunk" . diff-hl-stage-dwim)
   "u" '("Unstage Hunk" . diff-hl-revert-hunk)
   "S" '("Stage File" . magit-stage)
@@ -1070,6 +1081,8 @@ https://github.com/minad/org-modern
   "t" '("terminal" . vterm)
   "c" '("calc" . calc)
   "m" '("mail" . mu4e)
+  "s" '("sage" . sage-shell:run-sage)
+  "f" '("feed" . elfeed)
   ;; "c" '("config" . lambda () () )
 )
 #+end_src
@@ -1099,6 +1112,8 @@ https://github.com/minad/org-modern
   "C-u" '("universal argument" . universal-argument)
 )
 (evil-define-key 'normal 'global (kbd "<leader>") (cons "Leader"  ss/leader-map))
+(eval-after-load 'dired
+  (evil-define-key 'normal dired-mode-map (kbd "SPC") ss/leader-map))
 ;; (evil-define-key 'insert 'global (kbd "<leader>") (cons "Leader"  ss/leader-map))
 #+end_src
 *** Visual Mode Leader
@@ -1249,8 +1264,9 @@ When this mode is enabled, text will be centerd with respect to
   (visual-fill-column-center-text t)
   (visual-fill-column-width nil)
   (fill-column 80)
-  :hook (org-mode . (lambda () (setq-local visual-fill-column-width 150))))
-  :hook '(Info-mode help-mode Man-mode org-mode)
+  :hook (org-mode . (lambda () (setq-local visual-fill-column-width 150)))
+  :hook '(Info-mode help-mode Man-mode org-mode))
+
 #+end_src
 ** Scrolling
 [[info:emacs#Auto Scrolling][Auto Scrolling]]
@@ -1381,13 +1397,18 @@ Rainbow mode may need to be installed seperately from a clean install
 *** Startup
 #+begin_src emacs-lisp
 (setq inhibit-startup-message t
-initial-scratch-message nil
-initial-buffer-choice "~")
+      initial-scratch-message nil
+      initial-buffer-choice "~")
 #+end_src
 *** Y/N
 If yes or no gets too annoying
 #+begin_src emacs-lisp
 ;; (setopt use-short-answers t)
+#+end_src
+*** bookmark
+Always save bookmarks after creation, emacs has crashed sometimes
+#+begin_src emacs-lisp
+(setq bookmark-save-flag 1)
 #+end_src
 * Appearance Tweaks
 ** Theme
@@ -1496,3 +1517,5 @@ CAS, Calc is great, but there are things it can't do.
 - FriCAS
 - Octave
   
+
+
