@@ -1,2 +1,2 @@
-/zsh/shell/\.zcompdump
+**/\.zcompdump
 /config/nvim/nvim/lazy-lock.json
