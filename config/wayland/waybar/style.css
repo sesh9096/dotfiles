@@ -144,11 +144,11 @@ button:hover {
 #battery.critical:not(.charging) {
     background-color: #f53c3c;
     color: #ffffff;
-    animation-name: blink;
-    animation-duration: 0.5s;
-    animation-timing-function: steps(12);
-    animation-iteration-count: infinite;
-    animation-direction: alternate;
+    /* animation-name: blink; */
+    /* animation-duration: 0.5s; */
+    /* animation-timing-function: steps(12); */
+    /* animation-iteration-count: infinite; */
+    /* animation-direction: alternate; */
 }
 
 #power-profiles-daemon {
@@ -286,6 +286,10 @@ label:focus {
     background: rgba(0, 0, 0, 0.2);
 }
 
+#keyboard-state > label.capslock.locked{
+    background: #a00000;
+}
+
 #scratchpad {
     background: rgba(0, 0, 0, 0.2);
 }
@@ -316,7 +320,7 @@ label:focus {
 }
 #tags button{
     padding: 2 0px;
-    min-height: 0;
+    min-height: 0px;
     color: white;
 }
 #tags button:hover {
