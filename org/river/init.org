@@ -133,6 +133,8 @@ riverctl map normal Super F toggle-fullscreen
 # Super+Shift+Return to bump the focused view to the top of the layout stack
 riverctl map normal Super+Shift Return zoom
 
+# Super+Tab to swap between 2 setups
+riverctl map normal Super Tab focus-previous-tags
 #+end_src
 ** layout generator
 #+begin_src sh
@@ -167,10 +169,6 @@ riverctl map normal Super Up    send-layout-cmd rivertile "main-location top"
 riverctl map normal Super Right send-layout-cmd rivertile "main-location right"
 riverctl map normal Super Down  send-layout-cmd rivertile "main-location bottom"
 riverctl map normal Super Left  send-layout-cmd rivertile "main-location left"
-
-# Make all views with an app-id that starts with "float" and title "foo" start floating.
-riverctl rule-add -app-id 'float*' -title 'org capture' float
-
 #+end_src
 *** rivercarro
 #+begin_src sh
@@ -311,16 +309,38 @@ riverctl map normal Super+Control P spawn "fuzzel --list-executables-in-path"
 riverctl map normal Super E spawn "emacsclient --alternate-editor='' --create-frame"
 riverctl map normal Super X spawn "fuzzpkill"
 riverctl map normal Super+Shift X spawn "fuzzkill"
-riverctl map normal Super V spawn "nmcli connection up 'UCB VPN rc' && notify-send 'Connected to UCB VPN rc'"
+# copy command to set currently focused window to float to clipboard
+riverctl map normal Super+Control+Shift Space spawn "lswt | awk -F \"  +\" 'NR != 1 && /^..a./ {print \"riverctl rule-add -app-id \" \$2 \" -title \" \$3 \" float\"}' | wl-copy; notify-send 'command copied'"
+# I need those clickers
+riverctl map normal Super+Control+Shift C spawn "xdg-open 'https://shibboleth-sp.reef-education.com/Shibboleth.sso/Login?entityID=https%3A%2F%2Ffedauth.colorado.edu%2Fidp%2Fshibboleth&target=https%3A%2F%2Fshibboleth-sp.reef-education.com%2Fv1%2Fusers%2Fcheck-federated-redirect%3FinstitutionId%3Db6454bb5-fd0d-473d-95b9-760440882390'"
+
+# riverctl map normal Super V spawn "nmcli connection up 'UCB VPN rc' && notify-send 'Connected to UCB VPN rc'"
+riverctl map normal Super V spawn "if nmcli connection show 'UCB VPN rc' | grep GENERAL.STATE > /dev/null; then nmcli connection down 'UCB VPN rc' && notify-send 'Disconnected from UCB VPN rc'; else nmcli connection up 'UCB VPN rc' && notify-send 'Connected to UCB VPN rc'; fi"
 #+end_src
 * rules
 use =lswt= to get app-id's and names
-
+** Floating windows
 #+begin_src sh
 riverctl rule-add -app-id nm-openconnect-auth-dialog float
 riverctl rule-add -app-id nm-openconnect-auth-dialog position 600 20
 riverctl rule-add -app-id nm-connection-editor float
-riverctl rule-add -title zoom float
-riverctl rule-add -title "Zoom Workplace" float
-riverctl rule-add -title "Zoom Workplace" position 0 20
+riverctl rule-add -app-id zoom -title zoom float
+riverctl rule-add -app-id zoom -title "Zoom Workplace" float
+riverctl rule-add -app-id zoom -title "Zoom Workplace" position 0 20
+riverctl rule-add -app-id org.inkscape.Inkscape -title "New From Template" float
+riverctl rule-add -app-id Firefox -title "Picture-in-Picture" float
+riverctl rule-add -app-id Gimp-2.10 -title "Quit GIMP" float
+#+end_src
+** default tags
+1. terminals
+2. web browser + password manager in monocle
+3. emacs session for notes and assignments
+4. actually productive apps
+5. "productivity" apps on in monocle
+#+begin_src sh
+riverctl rule-add -app-id org.keepassxc.KeePassXC -title "Passwords.kdbx [Locked] - KeePassXC" tags $((1 << (2-1)))
+riverctl rule-add -app-id Firefox tags $((1 << (2-1)))
+
+riverctl rule-add -app-id Slack tags $((1 << (5-1)))
+riverctl rule-add -app-id zoom -title Meeting tags $((1 << (5-1)))
 #+end_src
