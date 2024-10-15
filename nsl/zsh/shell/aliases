@@ -14,12 +14,12 @@ alias ip='ip --color=auto'
 
 alias hibernate='i3lock -c 101010 && systemctl hibernate'
 
-alias aijl='$HOME/venv/bin/jupyter-lab'
-alias aijn='$HOME/venv/bin/jupyter-notebook'
-alias vjl='$HOME/venv/bin/jupyter-lab'
-alias vjn='$HOME/venv/bin/jupyter-notebook'
-alias vpython='$HOME/venv/bin/python'
-alias vpip='$HOME/venv/bin/pip'
+alias aijl='$HOME/extern/venv/bin/jupyter-lab'
+alias aijn='$HOME/extern/venv/bin/jupyter-notebook'
+alias vjl='$HOME/extern/venv/bin/jupyter-lab'
+alias vjn='$HOME/extern/venv/bin/jupyter-notebook'
+alias vpython='$HOME/extern/venv/bin/python'
+alias vpip='$HOME/extern/venv/bin/pip'
 
 alias ucbvpn='nmcli connection up --ask UCB\ VPN'
 

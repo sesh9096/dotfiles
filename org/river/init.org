@@ -15,7 +15,9 @@
 # documentation.
 #+end_src
 ** starting apps
+fixed dbus environment issue 2024-09-28, took soooooo long. This was causing issues with xdg-desktop-portals and some other things.
 #+begin_src sh
+dbus-update-activation-environment XDG_CURRENT_DESKTOP DISPLAY WAYLAND_DISPLAY & # set environment variables for flatpaks
 waybar &
 swaybg -i ~/pictures/draw/experiment.png &
 dunst &
@@ -27,11 +29,11 @@ swayidle -w &
 #+begin_src sh
 # Fixes for some gtk apps looking bad
 riverctl rule-add ssd
-# Note: the "Super" modifier is also known as Logo, GUI, Windows, Mod4, etc.
 
 # Set keyboard repeat rate
 riverctl set-repeat 50 300
 riverctl focus-follows-cursor normal
+riverctl set-cursor-warp on-focus-change
 riverctl default-attach-mode below
 #+end_src
 ** colors
@@ -43,6 +45,7 @@ riverctl border-color-unfocused 0x283e45
 riverctl border-color-urgent 0x700000
 #+end_src
 * Window management
+Note: the "Super" modifier is also known as Logo, GUI, Windows, Mod4, etc.
 ** close
 #+begin_src sh
 # Super+Q to close the focused view

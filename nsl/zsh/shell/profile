@@ -1,5 +1,10 @@
 #!/bin/zsh
 
 # gsettings set org.gnome.desktop.interface icon-theme Arc
-gsettings set org.gnome.desktop.interface gtk-theme Arc-Dark
-[ "$(tty)" = "/dev/tty1" ] && ! pidof -s river > /dev/null 2>&1 && dbus-run-session river
+if [ "$(tty)" = "/dev/tty1" ] && ! pidof -s river > /dev/null 2>&1; then
+  XDG_CURRENT_DESKTOP=river
+  dbus-run-session river &> ~/.cache/river-log &
+  gsettings set org.gnome.desktop.interface gtk-theme Arc-Dark
+  gsettings set org.gnome.desktop.interface gtk-color-scheme prefer-dark
+  gsettings set org.gnome.desktop.interface color-scheme prefer-dark
+fi
