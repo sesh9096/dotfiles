@@ -28,7 +28,15 @@ return {
   vim.keymap.set('n', 'yss', 'ys_', { remap = true })
   require('mini.pairs').setup()
   require('mini.trailspace').setup()
-  require('mini.comment').setup()
+  require('mini.comment').setup{
+    mappings = {
+      comment = '<M-;>',
+      comment_line = '<M-;>',
+      comment_visual = '<M-;>',
+      textobject = 'ac',
+    },
+  }
+  require('mini.diff').setup()
 
   end,
 }
