@@ -1325,7 +1325,10 @@ Set scroll to be less jarring
       scroll-margin 4 ;; similar to scrolloff in vim
       hscroll-step 1 ;; similar to scrolloff in vim
       hscroll-margin 4 ;; for horizontal scroll
+      mouse-wheel-tilt-scroll t ;; horizontal mouse wheel/trackpad scrolling
+      ;; mouse-wheel-flip-direction nil
 )
+(pixel-scroll-precision-mode 1) ;; better scrolling in graphical interfaces
 #+end_src
 Scroll left and right
 [[https://www.emacswiki.org/emacs/TruncateLines][emacswiki]]

@@ -32,7 +32,7 @@ riverctl rule-add ssd
 
 # Set keyboard repeat rate
 riverctl set-repeat 50 300
-riverctl focus-follows-cursor normal
+riverctl focus-follows-cursor disabled
 riverctl set-cursor-warp on-focus-change
 riverctl default-attach-mode below
 #+end_src
