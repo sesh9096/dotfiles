@@ -384,6 +384,7 @@ Other options:
      (output-html "xdg-open"))))
 (use-package cdlatex
   :custom (cdlatex-math-modify-alist '((?B "\\mathbb" nil t nil nil)))
+  :config (evil-define-key 'visual 'org-cdlatex-mode-map (kbd "'") 'org-cdlatex-math-modify)
   :hook (org-mode . turn-on-org-cdlatex)
   :hook (LaTex-Mode . cdlatex-mode))
 #+end_src
@@ -602,11 +603,21 @@ You can delete a surrounding with ds<textobject>.
   :config
   (defun ss/evil-surround-backslash ()
     "Read a something from the minibuffer and wrap selection with backslash selection"
-    (let ((fname (evil-surround-read-from-minibuffer "\\" "")))
-      (cons (format "\\%s" (or fname ""))
-            (format "\\%s" (or fname "")))))
-  (global-evil-surround-mode 1)
-  (add-to-list 'evil-surround-pairs-alist '(?\\ . ss/evil-surround-backslash)))
+    (let ((delim (read-char "\\")))
+      (cl-case delim
+        (?\x28 (cons "\\(" "\\)"))
+        (?\x29 (cons "\\( " " \\)"))
+        (?\x5b (cons "\\[" "\\]"))
+        (?\x5d (cons "\\[ " " \\]"))
+        (?\x7b (cons "\\{" "\\}"))
+        (?\x7d (cons "\\{ " " \\}"))
+        (?\x3e (cons "\\<" "\\>"))
+        (t (cons (string ?\\ delim) (string ?\\ delim))))))
+  ;;   (let ((fname (evil-surround-read-from-minibuffer "\\" "")))
+  ;;     (cons (format "\\%s" (or fname ""))
+  ;;           (s-replace-all '(("(" . ")") ("[" . "]") ("{" . "}") (")" . "(") ("]" . "[") ("}" . "{")) (format "\\%s" (or fname ""))))))
+  (setopt evil-surround-pairs-alist (cons (cons ?\\ 'ss/evil-surround-backslash) evil-surround-pairs-alist))
+  (global-evil-surround-mode 1))
 #+end_src
 
 ** Indentation
