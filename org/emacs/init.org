@@ -119,9 +119,9 @@ A package for highlighting and manipulating diffs/changes
 (use-package diff-hl
   :init
   (global-diff-hl-mode)
-  ;; (diff-hl-dired-mode 1)
   (diff-hl-flydiff-mode 1)
   ;; (diff-hl-margin-mode 1)
+  (global-diff-hl-show-hunk-mouse-mode 1)
   :hook ((dired-mode . diff-hl-dired-mode)
          (magit-pre-refresh . diff-hl-magit-pre-refresh)
          (magit-post-refresh . diff-hl-magit-post-refresh)
@@ -354,7 +354,18 @@ Other options:
 #+begin_src emacs-lisp
 ;; Read ePub files
 (use-package nov
-  :mode ("\\.epub\\'" . nov-mode))
+  :mode ("\\.epub\\'" . nov-mode)
+  :config
+  (defun my-nov-font-setup ()
+    ;; (face-remap-add-relative 'variable-pitch :height 2.0)
+    (face-remap-add-relative 'default :height 1.0)
+    (face-remap-add-relative 'nobreak-space :underline nil)
+    (nov-render-document))
+  :hook (nov-mode . my-nov-font-setup)
+  :bind (:map nov-mode-map
+              ("d" . 'dictionary-search)
+              ("<normal-state>d" . 'dictionary-search)
+              ("<visual-state>d" . 'dictionary-search)))
 #+end_src
 ** markdown
 #+begin_src emacs-lisp
@@ -433,8 +444,8 @@ Other options:
   (setq elfeed-feeds
         '(("https://voidlinux.org/atom.xml" linux)
           ("https://crypto.katestange.net/feed" school)
-          ("https://xkcd.com/atom.xml" entertainment)
-          ("https://anchor.fm/s/149fd51c/podcast/rss" entertainment linux))))
+          ;; ("https://anchor.fm/s/149fd51c/podcast/rss" entertainment linux)
+          ("https://xkcd.com/atom.xml" entertainment))))
 #+end_src
 ** sage
 #+begin_src emacs-lisp
@@ -521,6 +532,7 @@ Set this up to use more vim-like keys similar to =lf=.
   (put 'dired-find-alternate-file 'disabled nil)
   :custom
   (dired-listing-switches "-ahvlD --group-directories-first")
+  (dired-guess-shell-alist-user '(("\\.pdf\\'" "zathura")))
   (delete-by-moving-to-trash t)
   (dired-dwim-target t)
   (dired-kill-when-opening-new-dired-buffer t))
@@ -605,12 +617,12 @@ You can delete a surrounding with ds<textobject>.
     "Read a something from the minibuffer and wrap selection with backslash selection"
     (let ((delim (read-char "\\")))
       (cl-case delim
-        (?\x28 (cons "\\(" "\\)"))
-        (?\x29 (cons "\\( " " \\)"))
-        (?\x5b (cons "\\[" "\\]"))
-        (?\x5d (cons "\\[ " " \\]"))
-        (?\x7b (cons "\\{" "\\}"))
-        (?\x7d (cons "\\{ " " \\}"))
+        (?\x28 (cons "\\( " " \\)"))
+        (?\x29 (cons "\\(" "\\)"))
+        (?\x5b (cons "\\[ " " \\]"))
+        (?\x5d (cons "\\[" "\\]"))
+        (?\x7b (cons "\\{ " " \\}"))
+        (?\x7d (cons "\\{" "\\}"))
         (?\x3e (cons "\\<" "\\>"))
         (t (cons (string ?\\ delim) (string ?\\ delim))))))
   ;;   (let ((fname (evil-surround-read-from-minibuffer "\\" "")))
@@ -748,8 +760,7 @@ Increment and decrement numbers
   ;; remove <> from syntax table becuase they are sometimes used for other purposes
   (modify-syntax-entry ?< "@" org-mode-syntax-table)
   (modify-syntax-entry ?> "@" org-mode-syntax-table)
-  (add-to-list 'org-latex-packages-alist '("newfloat" "minted"))
-  )
+  :custom (org-latex-packages-alist '(("newfloat" "minted") ("" "braket"))))
 #+end_src
 ** Languages
 *** Babel
@@ -930,6 +941,8 @@ https://github.com/minad/org-modern
 #+begin_src emacs-lisp
 (keymap-set help-map (kbd "M") 'man)
 (keymap-set help-map (kbd "y") 'yas-describe-tables)
+(keymap-set help-map (kbd "W") 'dictionary-search)
+(keymap-unset help-map (kbd "h"))
 #+end_src
 #+begin_src emacs-lisp
 (with-eval-after-load 'evil-maps
@@ -985,6 +998,7 @@ https://github.com/minad/org-modern
 (defvar-keymap ss/git-map :doc "Git"
   "m" '("Magit" . magit)
   "g" '("Magit" . magit)
+  "b" '("Branch" . vc-switch-branch)
   "d" '("Dispatch" . magit-dispatch)
   "n" '("Next Hunk" . diff-hl-next-hunk)
   "p" '("Prev Hunk" . diff-hl-previous-hunk)
@@ -1137,6 +1151,7 @@ https://github.com/minad/org-modern
 (defvar-keymap ss/start-map :doc "Start"
   "t" '("terminal" . vterm)
   "c" '("calc" . calc)
+  "C" '("calc(embedded)" . calc-embedded)
   "m" '("mail" . mu4e)
   "s" '("sage" . sage-shell:run-sage)
   "f" '("feed" . elfeed)
@@ -1216,7 +1231,12 @@ Note: look under other
 #+end_src
 ** Fixes
 Remap where space is used elsewhere
+
+[[https://lists.gnu.org/archive/html/bug-gnu-emacs/2021-07/msg00071.html]]
 #+begin_src emacs-lisp
+;; for some reason, pgtk/gtk has a bug where S-SPC cannot be recognized.
+;; this means input methods may not work properly,
+(pgtk-use-im-context nil)
 (put 'dired-jump 'repeat-map nil)
 ;; Space will be remapped
 (evil-define-key 'normal Info-mode-map (kbd "C-SPC") 'Info-scroll-down)
@@ -1446,6 +1466,10 @@ Rainbow mode may need to be installed seperately from a clean install
 ;; (add-hook 'prog-mode-hook #'rainbow-mode)
 #+end_src
 ** Other
+*** Dictionary
+#+begin_src emacs-lisp
+(setopt dictionary-use-single-buffer t)
+#+end_src
 *** Turn off noise
 #+begin_src emacs-lisp
 (setq frame-resize-pixelwise t)

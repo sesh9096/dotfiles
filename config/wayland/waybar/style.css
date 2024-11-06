@@ -7,7 +7,6 @@ window#waybar {
     font-size: 11px;
     margin: 0 0px;
     background-color: rgba(43, 48, 59, 0.5);
-    border-bottom: 2px solid rgba(100, 114, 125, 0.5);
     color: #ffffff;
     transition-property: background-color;
     transition-duration: .5s;
@@ -18,7 +17,7 @@ window#waybar.hidden {
 }
 
 label.module {
-    border-radius: 25px;
+    border-bottom: 2px solid rgba(100, 114, 125, 0.5);
     padding: 0 0px;
 }
 
@@ -121,18 +120,6 @@ button:hover {
     margin-right: 0;
 }
 
-#clock {
-    background-color: #333333;
-}
-
-#battery {
-    background-color: #333333;
-}
-
-#battery.charging, #battery.plugged {
-    background-color: #333333;
-}
-
 @keyframes blink {
     to {
         background-color: #ffffff;
@@ -174,26 +161,6 @@ label:focus {
     background-color: #000000;
 }
 
-#cpu {
-    background-color: #333333;
-}
-
-#memory {
-    background-color: #333333;
-}
-
-#disk {
-    background-color: #333333;
-}
-
-#backlight {
-    background-color: #333333;
-}
-
-#network {
-    background-color: #333333;
-}
-
 #network.disconnected {
     background-color: #f53c3c;
 }
@@ -227,10 +194,6 @@ label:focus {
     background-color: #ffa000;
 }
 
-#temperature {
-    background-color: #333333;
-}
-
 #temperature.critical {
     background-color: #820202;
 }
@@ -242,10 +205,6 @@ label:focus {
 #tray > .needs-attention {
     -gtk-icon-effect: highlight;
     background-color: #eb4d4b;
-}
-
-#idle_inhibitor {
-    background-color: #2d3436;
 }
 
 #idle_inhibitor.activated {
