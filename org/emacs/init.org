@@ -969,13 +969,28 @@ https://github.com/minad/org-modern
 )
 #+end_src
 *** Org
+**** table
+#+begin_src emacs-lisp
+(defvar-keymap ss/org-table-map :doc "Useful org table operations"
+               "h" '("move cell left" . org-table-move-cell-left)
+               "j" '("move cell down" . org-table-move-cell-down)
+               "k" '("move cell up" . org-table-move-cell-up)
+               "l" '("move cell right" . org-table-move-cell-right)
+               "H" '("move column left" . org-table-move-column-left)
+               "J" '("move row down" . org-table-move-row-down)
+               "K" '("move row up" . org-table-move-row-up)
+               "L" '("move column right" . org-table-move-column-right)
+               "T" '("transpose" . org-table-transpose-table-at-point)
+               "s" '("sort by column" . org-table-sort-lines))
+#+end_src
 #+begin_src emacs-lisp
 ;; (makunbound 'ss/org-map)
 (defvar-keymap ss/org-map :doc "Useful org operations"
   "a" '("Agenda" . org-agenda)
   "c" '("Capture" . org-capture)
   "e" '("Export to PDF" . "\C-c\C-elo" )
-  "t" '("Tangle" . org-babel-tangle)
+  "t" (cons "table" ss/org-table-map)
+  "T" '("Tangle" . org-babel-tangle)
   "h" '("Heading" . consult-org-heading)
   "l" '("Latex Preview" . org-latex-preview)
   "p" '("Publish" . org-publish)
@@ -1236,7 +1251,7 @@ Remap where space is used elsewhere
 #+begin_src emacs-lisp
 ;; for some reason, pgtk/gtk has a bug where S-SPC cannot be recognized.
 ;; this means input methods may not work properly,
-(pgtk-use-im-context nil)
+(add-hook 'server-after-make-frame-hook (lambda() (pgtk-use-im-context nil)))
 (put 'dired-jump 'repeat-map nil)
 ;; Space will be remapped
 (evil-define-key 'normal Info-mode-map (kbd "C-SPC") 'Info-scroll-down)

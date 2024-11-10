@@ -36,13 +36,19 @@ riverctl focus-follows-cursor disabled
 riverctl set-cursor-warp on-focus-change
 riverctl default-attach-mode below
 #+end_src
-** colors
+** theming
 #+begin_src sh
 # Set background and border color
 # riverctl background-color 0x000000
 riverctl border-color-focused 0xa3b1b1
 riverctl border-color-unfocused 0x283e45
 riverctl border-color-urgent 0x700000
+riverctl xcursor-theme Breeze_Obsidian
+
+gsettings set org.gnome.desktop.interface gtk-theme Arc-Dark
+gsettings set org.gnome.desktop.interface gtk-color-scheme prefer-dark
+gsettings set org.gnome.desktop.interface color-scheme prefer-dark
+gsettings set org.gnome.desktop.interface cursor-theme Breeze_Obsidian
 #+end_src
 * Window management
 Note: the "Super" modifier is also known as Logo, GUI, Windows, Mod4, etc.
@@ -330,6 +336,7 @@ riverctl rule-add -app-id zoom -title "Zoom Workplace" position 0 20
 riverctl rule-add -app-id org.inkscape.Inkscape -title "New From Template" float
 riverctl rule-add -app-id Firefox -title "Picture-in-Picture" float
 riverctl rule-add -app-id Gimp-2.10 -title "Quit GIMP" float
+riverctl rule-add -app-id org.inkscape.Inkscape -title "Formula (pdflatex)" float
 #+end_src
 ** default tags
 1. terminals
