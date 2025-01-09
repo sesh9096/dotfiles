@@ -39,7 +39,7 @@ riverctl default-attach-mode below
 ** theming
 #+begin_src sh
 # Set background and border color
-# riverctl background-color 0x000000
+riverctl background-color 0x000000
 riverctl border-color-focused 0xa3b1b1
 riverctl border-color-unfocused 0x283e45
 riverctl border-color-urgent 0x700000
@@ -141,9 +141,7 @@ riverctl map normal Super+Shift Return zoom
 
 # Super+Tab to swap between 2 setups
 riverctl map normal Super Tab focus-previous-tags
-#+end_src
-** layout generator
-#+begin_src sh
+
 # Super+J and Super+K to focus the next/previous view in the layout stack
 riverctl map normal Super J focus-view next
 riverctl map normal Super K focus-view previous
@@ -153,63 +151,61 @@ riverctl map normal Super K focus-view previous
 riverctl map normal Super+Shift J swap next
 riverctl map normal Super+Shift K swap previous
 #+end_src
-
-*** rivertile
-#+begin_src sh :tangle no
-# Super+H and Super+L to decrease/increase the main ratio of rivertile(1)
-riverctl map normal Super H send-layout-cmd rivertile "main-ratio -0.05"
-riverctl map normal Super L send-layout-cmd rivertile "main-ratio +0.05"
-
-# Super+Shift+H and Super+Shift+L to increment/decrement the main count of rivertile(1)
-riverctl map normal Super+Shift H send-layout-cmd rivertile "main-count +1"
-riverctl map normal Super+Shift L send-layout-cmd rivertile "main-count -1"
-
-# Set the default layout generator to be rivertile and start it.
-# River will send the process group of the init executable SIGTERM on exit.
-riverctl default-layout rivertile
-riverctl default-attach-mode below
-rivertile -view-padding 3 -outer-padding 3 &
-
-# Super+{Up,Right,Down,Left} to change layout orientation
-riverctl map normal Super Up    send-layout-cmd rivertile "main-location top"
-riverctl map normal Super Right send-layout-cmd rivertile "main-location right"
-riverctl map normal Super Down  send-layout-cmd rivertile "main-location bottom"
-riverctl map normal Super Left  send-layout-cmd rivertile "main-location left"
-#+end_src
-*** rivercarro
+** layout generator
 #+begin_src sh
-mod=Super
-# Mod+H and Mod+L to decrease/increase the main ratio of rivercarro
-riverctl map normal $mod H send-layout-cmd rivercarro "main-ratio -0.05"
-riverctl map normal $mod L send-layout-cmd rivercarro "main-ratio +0.05"
+if command -v rivercarro; then
+	mod=Super
+	# Mod+H and Mod+L to decrease/increase the main ratio of rivercarro
+	riverctl map normal $mod H send-layout-cmd rivercarro "main-ratio -0.05"
+	riverctl map normal $mod L send-layout-cmd rivercarro "main-ratio +0.05"
 
-# Mod+Shift+H and Mod+Shift+L to increment/decrement the main count of rivercarro
-riverctl map normal $mod+Shift H send-layout-cmd rivercarro "main-count +1"
-riverctl map normal $mod+Shift L send-layout-cmd rivercarro "main-count -1"
+	# Mod+Shift+H and Mod+Shift+L to increment/decrement the main count of rivercarro
+	riverctl map normal $mod+Shift H send-layout-cmd rivercarro "main-count +1"
+	riverctl map normal $mod+Shift L send-layout-cmd rivercarro "main-count -1"
 
-# Mod+{Up,Right,Down,Left} to change layout orientation
-riverctl map normal $mod Up    send-layout-cmd rivercarro "main-location top"
-riverctl map normal $mod Right send-layout-cmd rivercarro "main-location right"
-riverctl map normal $mod Down  send-layout-cmd rivercarro "main-location bottom"
-riverctl map normal $mod Left  send-layout-cmd rivercarro "main-location left"
-# And for monocle
-riverctl map normal $mod M     send-layout-cmd rivercarro "main-location monocle"
-# Cycle through layout
-riverctl map normal $mod W     send-layout-cmd rivercarro "main-location-cycle left,monocle"
+	# Mod+{Up,Right,Down,Left} to change layout orientation
+	riverctl map normal $mod Up    send-layout-cmd rivercarro "main-location top"
+	riverctl map normal $mod Right send-layout-cmd rivercarro "main-location right"
+	riverctl map normal $mod Down  send-layout-cmd rivercarro "main-location bottom"
+	riverctl map normal $mod Left  send-layout-cmd rivercarro "main-location left"
+	# And for monocle
+	riverctl map normal $mod M     send-layout-cmd rivercarro "main-location monocle"
+	# Cycle through layout
+	riverctl map normal $mod W     send-layout-cmd rivercarro "main-location-cycle left,monocle"
 
-# Add others rivercarro's commands the same way with the keybinds you'd like.
-# e.g.
-# riverctl map normal $mod <keys> send-layout-cmd rivercarro "inner-gaps -1"
-# riverctl map normal $mod <keys> send-layout-cmd rivercarro "inner-gaps +1"
-# riverctl map normal $mod <keys> send-layout-cmd rivercarro "outer-gaps -1"
-# riverctl map normal $mod <keys> send-layout-cmd rivercarro "outer-gaps +1"
-# riverctl map normal $mod <keys> send-layout-cmd rivercarro "width-ratio -0.1"
-# riverctl map normal $mod <keys> send-layout-cmd rivercarro "width-ratio +0.1"
+	# Add others rivercarro's commands the same way with the keybinds you'd like.
+	# e.g.
+	# riverctl map normal $mod <keys> send-layout-cmd rivercarro "inner-gaps -1"
+	# riverctl map normal $mod <keys> send-layout-cmd rivercarro "inner-gaps +1"
+	# riverctl map normal $mod <keys> send-layout-cmd rivercarro "outer-gaps -1"
+	# riverctl map normal $mod <keys> send-layout-cmd rivercarro "outer-gaps +1"
+	# riverctl map normal $mod <keys> send-layout-cmd rivercarro "width-ratio -0.1"
+	# riverctl map normal $mod <keys> send-layout-cmd rivercarro "width-ratio +0.1"
 
-# Set the default layout generator to be rivercarro and start it.
-# River will send the process group of the init executable SIGTERM on exit.
-riverctl default-layout rivercarro
-rivercarro -per-tag &
+	# Set the default layout generator to be rivercarro and start it.
+	# River will send the process group of the init executable SIGTERM on exit.
+	riverctl default-layout rivercarro
+	rivercarro -per-tag &
+else
+	# Super+H and Super+L to decrease/increase the main ratio of rivertile(1)
+	riverctl map normal Super H send-layout-cmd rivertile "main-ratio -0.05"
+	riverctl map normal Super L send-layout-cmd rivertile "main-ratio +0.05"
+
+	# Super+Shift+H and Super+Shift+L to increment/decrement the main count of rivertile(1)
+	riverctl map normal Super+Shift H send-layout-cmd rivertile "main-count +1"
+	riverctl map normal Super+Shift L send-layout-cmd rivertile "main-count -1"
+
+	# Super+{Up,Right,Down,Left} to change layout orientation
+	riverctl map normal Super Up    send-layout-cmd rivertile "main-location top"
+	riverctl map normal Super Right send-layout-cmd rivertile "main-location right"
+	riverctl map normal Super Down  send-layout-cmd rivertile "main-location bottom"
+	riverctl map normal Super Left  send-layout-cmd rivertile "main-location left"
+
+	# Set the default layout generator to be rivertile and start it.
+	# River will send the process group of the init executable SIGTERM on exit.
+	riverctl default-layout rivertile
+	rivertile -view-padding 3 -outer-padding 3 &
+fi
 #+end_src
 ** scratchpad/sticky
 Taken from
@@ -315,6 +311,8 @@ riverctl map normal Super+Control P spawn "fuzzel --list-executables-in-path"
 riverctl map normal Super E spawn "emacsclient --alternate-editor='' --create-frame"
 riverctl map normal Super X spawn "fuzzpkill"
 riverctl map normal Super+Shift X spawn "fuzzkill"
+riverctl map normal Super R spawn "find_resource $HOME/extern/resources"
+riverctl map normal Super+Shift R spawn "find_resource $HOME"
 # copy command to set currently focused window to float to clipboard
 riverctl map normal Super+Control+Shift Space spawn "lswt | awk -F \"  +\" 'NR != 1 && /^..a./ {print \"riverctl rule-add -app-id \" \$2 \" -title \" \$3 \" float\"}' | wl-copy; notify-send 'command copied'"
 # I need those clickers

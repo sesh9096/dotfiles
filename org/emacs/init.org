@@ -122,11 +122,12 @@ A package for highlighting and manipulating diffs/changes
   (diff-hl-flydiff-mode 1)
   ;; (diff-hl-margin-mode 1)
   (global-diff-hl-show-hunk-mouse-mode 1)
+  :config
+  (evil-define-key '(normal visual) 'global (kbd "[h") 'diff-hl-previous-hunk)
+  (evil-define-key '(normal visual) 'global (kbd "]h") 'diff-hl-next-hunk)
   :hook ((dired-mode . diff-hl-dired-mode)
          (magit-pre-refresh . diff-hl-magit-pre-refresh)
-         (magit-post-refresh . diff-hl-magit-post-refresh)
-  ;; :custom-face 
-))
+         (magit-post-refresh . diff-hl-magit-post-refresh)))
 #+end_src
 ** TODO Other
 *** DONE Projectile
@@ -144,6 +145,13 @@ A package for highlighting and manipulating diffs/changes
 (use-package vertico
   :init
   (vertico-mode)
+  (vertico-indexed-mode)
+  (vertico-mouse-mode)
+  (vertico-reverse-mode)
+  ;; (setq vertico-multiform-categories
+  ;;       '((buffer)))
+  ;; (vertico-multiform-mode)
+  ;; (vertico-unobtrusive-mode 0)
 
   ;; Different scroll margin
   ;; (setq vertico-scroll-margin 0)
@@ -204,7 +212,7 @@ Try out flx, affe, ...?
 ;; (use-package fzf)
 #+end_src
 ** In buffer
-*** TODO Corfu
+*** Corfu
 Completion Menu
 Tweak setting for faster response time
 #+begin_src emacs-lisp
@@ -397,7 +405,7 @@ Other options:
   :custom (cdlatex-math-modify-alist '((?B "\\mathbb" nil t nil nil)))
   :config (evil-define-key 'visual 'org-cdlatex-mode-map (kbd "'") 'org-cdlatex-math-modify)
   :hook (org-mode . turn-on-org-cdlatex)
-  :hook (LaTex-Mode . cdlatex-mode))
+  :hook (LaTeX-mode . cdlatex-mode))
 #+end_src
 ** plantuml
 #+begin_src emacs-lisp
@@ -424,7 +432,9 @@ Other options:
 #+begin_src emacs-lisp
 (use-package lua-mode
   :mode "\\.lua\\'"
-  :custom (lua-indent-level 2))
+  :custom (lua-indent-level 2)
+  :config
+  (evil-define-key '(normal visual) lua-mode-map (kbd "%") 'lua-goto-matching-block))
 #+end_src
 ** email
 #+begin_src emacs-lisp
@@ -443,16 +453,22 @@ Other options:
   :config
   (setq elfeed-feeds
         '(("https://voidlinux.org/atom.xml" linux)
-          ("https://crypto.katestange.net/feed" school)
+          ("https://karthinks.com/index.xml" emacs)
           ;; ("https://anchor.fm/s/149fd51c/podcast/rss" entertainment linux)
           ("https://xkcd.com/atom.xml" entertainment))))
 #+end_src
 ** sage
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (use-package sage-shell-mode
   :mode ("\\.sage\\'" . sage-shell:sage)
   :config (sage-shell:define-alias)
   :commands (sage-shell:sage-mode sage-shell:run-new-sage))
+#+end_src
+** go
+#+begin_src emacs-lisp
+(use-package go-mode
+  :mode "\\.go\\'"
+  :config (gofmt-before-save))
 #+end_src
 * Files
 ** Dired
@@ -627,7 +643,7 @@ You can delete a surrounding with ds<textobject>.
         (t (cons (string ?\\ delim) (string ?\\ delim))))))
   ;;   (let ((fname (evil-surround-read-from-minibuffer "\\" "")))
   ;;     (cons (format "\\%s" (or fname ""))
-  ;;           (s-replace-all '(("(" . ")") ("[" . "]") ("{" . "}") (")" . "(") ("]" . "[") ("}" . "{")) (format "\\%s" (or fname ""))))))
+            ;; (s-replace-all '(("(" . ")") ("[" . "]") ("{" . "}") (")" . "(") ("]" . "[") ("}" . "{")) (format "\\%s" (or fname "")))))
   (setopt evil-surround-pairs-alist (cons (cons ?\\ 'ss/evil-surround-backslash) evil-surround-pairs-alist))
   (global-evil-surround-mode 1))
 #+end_src
@@ -736,8 +752,8 @@ Increment and decrement numbers
 ;; )
 #+end_src
 * Treesitter
-#+begin_src emacs-lisp :tangle no
-(require 'treesit)
+#+begin_src emacs-lisp
+(add-to-list 'auto-mode-alist '("\\.ya?ml\\'" . yaml-ts-mode))
 #+end_src
 * Org
 ** Main
@@ -770,7 +786,7 @@ Increment and decrement numbers
   :after org) ; for use with R
 #+end_src
 **** sage
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (use-package ob-sagemath
   :config
   (setq org-babel-default-header-args:sage '((:session . t)
@@ -788,8 +804,9 @@ Increment and decrement numbers
      (plantuml . t)
      (shell . t)
      (dot . t)
-     (sagemath . t)
+     ;; (sagemath . t)
      (lua . t)
+     (js . t)
      (R . t)))
   (setq org-confirm-babel-evaluate nil)
   (setq org-export-use-babel nil)
@@ -815,6 +832,7 @@ Nice syntax highlighting
                   ("puml" . "src plantuml")
                   ("sage" . "src sage")
                   ("lua" . "src lua")
+                  ("js" . "src js")
                   ("R" . "src R")))
     (add-to-list 'org-structure-template-alist cell)))
 #+end_src
@@ -958,10 +976,14 @@ https://github.com/minad/org-modern
 *** Toggle
 #+begin_src emacs-lisp
 ;; (makunbound 'ss/toggle-map)
+(defun ss/cycle-alpha ()
+  "Cycle between 4 alpha values for the current frame"
+  (interactive)
+  (set-frame-parameter nil 'alpha-background (pcase (frame-parameter nil 'alpha-background) (80 100) (100 0) (0 50) (_ 80))))
 (defvar-keymap ss/toggle-map  :doc "Keymap for toggling things"
   "n" '("Toggle numbers" . display-line-numbers-mode)
   "e" '("Emphasis markers" . (lambda() (interactive) (setq org-hide-emphasis-markers (not org-hide-emphasis-markers))))
-  "a" '("alpha" . (lambda () (interactive) (set-frame-parameter nil 'alpha-background (if (= 100 (frame-parameter nil 'alpha-background)) 80 100))))
+  "a" '("alpha" . ss/cycle-alpha)
   "k" '("center" . visual-fill-column-mode)
   "b" '("bar" . menu-bar-mode)
   "s" '("spelling" . flyspell-mode)
@@ -972,6 +994,7 @@ https://github.com/minad/org-modern
 **** table
 #+begin_src emacs-lisp
 (defvar-keymap ss/org-table-map :doc "Useful org table operations"
+               "c" '("recalculate" . org-table-recalculate)
                "h" '("move cell left" . org-table-move-cell-left)
                "j" '("move cell down" . org-table-move-cell-down)
                "k" '("move cell up" . org-table-move-cell-up)
@@ -983,6 +1006,7 @@ https://github.com/minad/org-modern
                "T" '("transpose" . org-table-transpose-table-at-point)
                "s" '("sort by column" . org-table-sort-lines))
 #+end_src
+**** main
 #+begin_src emacs-lisp
 ;; (makunbound 'ss/org-map)
 (defvar-keymap ss/org-map :doc "Useful org operations"
@@ -1018,7 +1042,8 @@ https://github.com/minad/org-modern
   "n" '("Next Hunk" . diff-hl-next-hunk)
   "p" '("Prev Hunk" . diff-hl-previous-hunk)
   "s" '("Stage Hunk" . diff-hl-stage-dwim)
-  "u" '("Unstage Hunk" . diff-hl-revert-hunk)
+  "U" '("Unstage File" . diff-hl-unstage-file)
+  "r" '("Revert Hunk" . diff-hl-revert-hunk)
   "S" '("Stage File" . magit-stage)
 )
 #+end_src
@@ -1033,6 +1058,17 @@ https://github.com/minad/org-modern
   "d" '("Delete" . evil-delete-buffer)
   "m" '("Menu" . list-buffers)
   "k" '("Kill" . kill-this-buffer)
+)
+#+end_src
+*** Compile
+#+begin_src emacs-lisp
+;; (makunbound 'ss/compile-map)
+(defvar-keymap ss/compile-map :doc "compile keymap"
+  "c" '("Compile" . compile)
+  "r" '("Recompile" . recompile)
+  "n" '("Next" . next-error)
+  "p" '("Previous" . previous-error)
+  "k" '("Kill" . kill-compilation)
 )
 #+end_src
 *** Language
@@ -1176,7 +1212,7 @@ https://github.com/minad/org-modern
 ** Leader
 #+begin_src emacs-lisp
 (evil-set-leader '(normal visual) (kbd "SPC"))
-(evil-set-leader nil (kbd "M-SPC")) 
+(evil-set-leader nil (kbd "M-SPC"))
 ;; (makunbound 'ss/leader-map)
 (defvar-keymap ss/leader-map  :doc "Leader map"
   "t" (cons "Toggle"  ss/toggle-map)
@@ -1184,6 +1220,7 @@ https://github.com/minad/org-modern
   "f" (cons "Find"  ss/find-map)
   "g" (cons "Git"  ss/git-map)
   "b" (cons "Buffer"  ss/buffer-map)
+  "c" (cons "Compile"  ss/compile-map)
   "l" (cons "LSP"  ss/lang-map)
   "e" (cons "Eval"  ss/elisp-map)
   "p" (cons "Project"  projectile-command-map)
@@ -1196,7 +1233,7 @@ https://github.com/minad/org-modern
   "'" '("Jump to mark" . bookmark-jump)
   "`" '("Consult mark" . consult-bookmark)
   "C-M-Q" '("Kill Emacs" . save-buffers-kill-emacs)
-  "C-u" '("universal argument" . universal-argument)
+  "u" '("universal argument" . universal-argument)
 )
 (evil-define-key 'normal 'global (kbd "<leader>") (cons "Leader"  ss/leader-map))
 (eval-after-load 'dired
@@ -1487,7 +1524,8 @@ Rainbow mode may need to be installed seperately from a clean install
 #+end_src
 *** Turn off noise
 #+begin_src emacs-lisp
-(setq frame-resize-pixelwise t)
+(setq frame-resize-pixelwise t
+      window-resize-pixelwise t)
 (scroll-bar-mode -1)
 (tool-bar-mode -1)
 (blink-cursor-mode 0)
@@ -1615,6 +1653,3 @@ CAS, Calc is great, but there are things it can't do.
 - [[https://maxima.sourceforge.io/project.html][maxima, a CAS written in Lisp]]
 - FriCAS
 - Octave
-  
-
-

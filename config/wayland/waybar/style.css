@@ -6,7 +6,7 @@ window#waybar {
     font-family: Iosevka, Symbols Nerd Font, Roboto, Helvetica, Arial, sans-serif;
     font-size: 11px;
     margin: 0 0px;
-    background-color: rgba(43, 48, 59, 0.5);
+    background-color: rgba(0, 0, 0, 0.5);
     color: #ffffff;
     transition-property: background-color;
     transition-duration: .5s;
