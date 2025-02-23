@@ -1045,6 +1045,7 @@ https://github.com/minad/org-modern
   "U" '("Unstage File" . diff-hl-unstage-file)
   "r" '("Revert Hunk" . diff-hl-revert-hunk)
   "S" '("Stage File" . magit-stage)
+  "C" '("Clone" . magit-clone)
 )
 #+end_src
 *** Buffer
@@ -1279,7 +1280,11 @@ Note: look under other
 (evil-define-key '(normal visual) 'global (kbd "[d") 'flymake-goto-prev-error)
 (evil-define-key '(normal visual) 'global (kbd "<leader>y") (cons "yank to clipbard" "\"+y"))
 (evil-define-key 'visual 'global (kbd "<leader>p") (cons "paste without losing selection" "\"_dP"))
-(evil-define-key 'normal 'global (kbd "C-;") (kbd "A; <escape>"));
+;; (defun append-semicolon (&optional n)
+;;     (interactive "p")
+;;     (use-region-p))
+(evil-define-key '(normal visual) 'global (kbd "C-;") (kbd "A; <escape>"))
+(evil-define-key '(normal visual) 'global (kbd "C-S-d") 'duplicate-dwim)
 #+end_src
 ** Fixes
 Remap where space is used elsewhere
@@ -1291,13 +1296,14 @@ Remap where space is used elsewhere
 (add-hook 'server-after-make-frame-hook (lambda() (pgtk-use-im-context nil)))
 (put 'dired-jump 'repeat-map nil)
 ;; Space will be remapped
-(evil-define-key 'normal Info-mode-map (kbd "C-SPC") 'Info-scroll-down)
 ;; (evil-define-key 'normal Info-mode-map (kbd "S-SPC") 'Info-scroll-down)
 ;; This maps the key universally (add-hook 'Info-mode-hook (lambda()(evil-define-key 'normal 'global (kbd "C-SPC") 'Info-scroll-up)) )
 
 ;; For use in normal mode in evil
 ;; (evil-define-key 'normal 'org-mode-map (kbd "RET") 'org-open-at-point)
-  (evil-collection-define-key 'normal 'org-mode-map (kbd "RET") 'org-open-at-point)
+(evil-collection-define-key 'normal 'org-mode-map (kbd "RET") 'org-open-at-point)
+(evil-define-key 'normal magit-mode-map (kbd "SPC") ss/leader-map)
+(evil-define-key 'normal magit-mode-map (kbd "S-SPC") 'magit-diff-show-or-scroll-up)
 #+end_src
 * UI
 ** Modeline

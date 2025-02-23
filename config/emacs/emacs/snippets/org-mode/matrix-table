@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: matrix tangle
+# expand-env: ((yas-indent-line 'fixed))
+# key: <mat
+# --
+#+attr_latex: :mode math :environment ${1:pmatrix} :math-prefix $2
+| ${0}1 | 0 |
+| 0 | 1 |

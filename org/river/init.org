@@ -335,6 +335,7 @@ riverctl rule-add -app-id org.inkscape.Inkscape -title "New From Template" float
 riverctl rule-add -app-id Firefox -title "Picture-in-Picture" float
 riverctl rule-add -app-id Gimp-2.10 -title "Quit GIMP" float
 riverctl rule-add -app-id org.inkscape.Inkscape -title "Formula (pdflatex)" float
+riverctl rule-add -app-id emacs -title Ediff float
 #+end_src
 ** default tags
 1. terminals

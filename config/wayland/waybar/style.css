@@ -278,7 +278,7 @@ label:focus {
     background-color: #0069d4;
 }
 #tags button{
-    padding: 2 0px;
+    padding: 2px 0px;
     min-height: 0px;
     color: white;
 }
