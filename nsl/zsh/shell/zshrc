@@ -1,3 +1,4 @@
+#!/usr/bin/zsh
 [[ $- != *i* ]] && return
 autoload -U colors && colors
 HISTSIZE=1000

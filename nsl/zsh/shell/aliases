@@ -12,6 +12,7 @@ alias mkdir='mkdir -pv'
 alias grep='grep --color=auto'
 alias ip='ip --color=auto'
 alias py='python'
+alias ipy='ipython'
 
 alias hibernate='i3lock -c 101010 && systemctl hibernate'
 

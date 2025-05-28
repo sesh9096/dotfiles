@@ -16,6 +16,7 @@ export CARGO_HOME="$XDG_DATA_HOME"/cargo
 export GRADLE_USER_HOME="$XDG_DATA_HOME"/gradle
 export _JAVA_AWT_WM_NONREPARENTING=1
 export PATH="$HOME/.local/bin:$PATH"
+export PATH="$XDG_DATA_HOME/gem/ruby/3.3.0/bin:$PATH"
 export MANPATH="$HOME/.local/share/man:/usr/local/share/man:/usr/share/man"
 export GRIM_DEFAULT_DIR="$HOME/pictures/screenshot"
 export MINETEST_USER_PATH="$HOME/extern/minetest"
