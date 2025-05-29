@@ -138,6 +138,17 @@ A package for highlighting and manipulating diffs/changes
 )
 #+end_src
 *** TODO Fuzzy Finding
+* LSP
+** eglot
+#+begin_src emacs-lisp
+(use-package eglot
+:ensure nil
+:config
+(eglot-inlay-hints-mode 0)
+;; :custom
+;; eglot-ignored-server-capabilities '(:inlayHintProvider)
+)
+#+end_src
 * Completion
 ** Mini-buffer
 *** Vertico:
@@ -451,11 +462,8 @@ Other options:
   :bind (:map elfeed-search-mode-map
          ("\C-r" . 'elfeed-update))
   :config
-  (setq elfeed-feeds
-        '(("https://voidlinux.org/atom.xml" linux)
-          ("https://karthinks.com/index.xml" emacs)
-          ;; ("https://anchor.fm/s/149fd51c/podcast/rss" entertainment linux)
-          ("https://xkcd.com/atom.xml" entertainment))))
+  (load-file (concat user-emacs-directory "elfeed-feeds.el"))
+  )
 #+end_src
 ** sage
 #+begin_src emacs-lisp :tangle no
@@ -693,7 +701,8 @@ Disable for selective modes
 #+end_src
 ** Whitespace
 #+begin_src emacs-lisp
-(setq whitespace-style '(face tabs tab-mark trailing missing-newline-at-eof))
+(setq whitespace-style '(face tabs tab-mark trailing missing-newline-at-eof lines-char empty))
+(setopt whitespace-line-column 110)
 (custom-set-faces
  '(whitespace-tab ((t (:foreground "#636363" :background "#111111")))))
 (setq whitespace-display-mappings
@@ -732,17 +741,6 @@ Increment and decrement numbers
 ** Fold
 #+begin_src emacs-lisp
 (add-hook 'prog-mode-hook #'hs-minor-mode)
-#+end_src
-* LSP
-** eglot
-#+begin_src emacs-lisp
-(use-package eglot
-:ensure nil
-:config
-(eglot-inlay-hints-mode 0)
-;; :custom
-;; eglot-ignored-server-capabilities '(:inlayHintProvider)
-)
 #+end_src
 * DAP
 #+begin_src emacs-lisp
@@ -833,6 +831,9 @@ Nice syntax highlighting
                   ("sage" . "src sage")
                   ("lua" . "src lua")
                   ("js" . "src js")
+                  ("clang" . "src c")
+                  ("cpp" . "src cpp")
+                  ("zig" . "src zig")
                   ("R" . "src R")))
     (add-to-list 'org-structure-template-alist cell)))
 #+end_src
@@ -858,6 +859,8 @@ Consider switching to engraved?
   ;; (require 'ox-md)
   ;; (require 'ox-man)
   (require 'ox-latex))
+;; (with-eval-after-load 'ox-latex
+;; (add-to-list 'org-latex-classes '("letter" "\\documentclass{letter}" ("\\begin{letter}" "\\end{letter}" "\\begin{letter}" "\\end{letter}"))))
 
 (setq org-export-allow-bind-keywords t)
 (setq org-latex-src-block-backend 'minted)
@@ -955,22 +958,65 @@ https://github.com/minad/org-modern
 (setopt tab-bar-show 1)
 #+end_src
 * Keybindings
-** Generic
+** Custom functions
 #+begin_src emacs-lisp
-(keymap-set help-map (kbd "M") 'man)
-(keymap-set help-map (kbd "y") 'yas-describe-tables)
-(keymap-set help-map (kbd "W") 'dictionary-search)
-(keymap-unset help-map (kbd "h"))
-#+end_src
-#+begin_src emacs-lisp
-(with-eval-after-load 'evil-maps
-  ;; (define-key evil-motion-state-map (kbd "RET") nil)
-  ;; (define-key evil-motion-state-map (kbd "SPC") nil)
-  ;; (define-key evil-motion-state-map (kbd "TAB") nil)
-)
-;; This doesn't work in evil mode
-(setq org-return-follows-link t)
-;; (repeat-mode 1)
+(defun ss/run-background-process (command)
+  "Run command in the background using `async-shell-command`"
+  (interactive "sCommand: ")
+  (let* ((command-buf (generate-new-buffer command))
+         (command-buf-name (buffer-name command-buf)))
+    (progn
+      (async-shell-command command command-buf-name command-buf-name)
+      (switch-to-prev-buffer (get-buffer-window command-buf))
+      (bury-buffer command-buf)
+      (message (concat "process started in: " command-buf-name)))))
+
+(defun ss/evil-move-down (beg end offset)
+  "Move lines down in visual line mode"
+  (interactive "r\np")
+  (evil-move beg end (+ (line-number-at-pos beg) offset))
+  (evil-force-normal-state) ;work around what is probably a bug
+  ;; (evil-visual-restore)
+  ;; (evil-indent (region-beginning) (region-end))
+  ;; (evil-force-normal-state)
+  (evil-visual-restore))
+
+(defun ss/evil-move-up (beg end offset)
+  "Move lines up in visual line mode"
+  (interactive "r\np")
+  (evil-move beg end (- (line-number-at-pos beg) (1+ offset)))
+  (evil-force-normal-state) ;work around what is probably a bug
+  ;; (evil-visual-restore)
+  ;; (evil-indent (region-beginning) (region-end))
+  ;; (evil-force-normal-state)
+  (evil-visual-restore))
+
+(defun ss/append-char (char)
+  "Append character to the end of the line or to the end of all lines in region"
+  (interactive "c")
+  (save-excursion
+    (if (region-active-p)
+        (let ((rb (region-beginning)) (re (region-end)))
+          (progn
+            (goto-char rb)
+            (beginning-of-line)
+            (while (<= (point) re)
+              (end-of-line)
+              (insert-char char)
+              (beginning-of-line)
+              (next-line))))
+      (progn (end-of-line)
+             (insert-char char)))))
+
+(defun ss/append-semicolon ()
+  "Append semicolon to the end of the line or to the end of all lines in region"
+  (interactive)
+  (ss/append-char ?;))
+
+(defun ss/append-comma ()
+  "Append semicolon to the end of the line or to the end of all lines in region"
+  (interactive)
+  (ss/append-char ?,))
 #+end_src
 ** Keymaps
 *** Toggle
@@ -981,11 +1027,13 @@ https://github.com/minad/org-modern
   (interactive)
   (set-frame-parameter nil 'alpha-background (pcase (frame-parameter nil 'alpha-background) (80 100) (100 0) (0 50) (_ 80))))
 (defvar-keymap ss/toggle-map  :doc "Keymap for toggling things"
+  "t" '("Tabs" . indent-tabs-mode)
   "n" '("Toggle numbers" . display-line-numbers-mode)
   "e" '("Emphasis markers" . (lambda() (interactive) (setq org-hide-emphasis-markers (not org-hide-emphasis-markers))))
   "a" '("alpha" . ss/cycle-alpha)
   "k" '("center" . visual-fill-column-mode)
   "b" '("bar" . menu-bar-mode)
+  "r" '("ribbon(toolbar)" . tool-bar-mode)
   "s" '("spelling" . flyspell-mode)
   "v" '("Visual Line" . visual-line-mode)
 )
@@ -1058,7 +1106,7 @@ https://github.com/minad/org-modern
   "p" '("Previous" . previous-buffer)
   "d" '("Delete" . evil-delete-buffer)
   "m" '("Menu" . list-buffers)
-  "k" '("Kill" . kill-this-buffer)
+  "k" '("Kill" . kill-current-buffer)
 )
 #+end_src
 *** Compile
@@ -1070,6 +1118,7 @@ https://github.com/minad/org-modern
   "n" '("Next" . next-error)
   "p" '("Previous" . previous-error)
   "k" '("Kill" . kill-compilation)
+  "m" '("Mode" . compilation-mode)
 )
 #+end_src
 *** Language
@@ -1140,6 +1189,7 @@ https://github.com/minad/org-modern
 #+end_src
 #+begin_src emacs-lisp
 (require 'ffap)
+(require 'transient)
 (transient-define-prefix ss/window-manager ()
   "menu for managing window keymaps"
   ["window operations"
@@ -1208,6 +1258,7 @@ https://github.com/minad/org-modern
   "s" '("sage" . sage-shell:run-sage)
   "f" '("feed" . elfeed)
   "i" '("irc" . erc-tls)
+  "b" '("background process" . ss/run-background-process)
 )
 #+end_src
 ** Leader
@@ -1276,14 +1327,29 @@ Note: look under other
 
 ** Other
 #+begin_src emacs-lisp
+(keymap-set help-map (kbd "M") 'man)
+(keymap-set help-map (kbd "y") 'yas-describe-tables)
+(keymap-set help-map (kbd "W") 'dictionary-search)
+(keymap-unset help-map (kbd "h"))
+(evil-define-key 'normal 'global (kbd "C-h C-w") 'ignore) ; I keep hitting by accident
+
+(with-eval-after-load 'evil-maps
+  ;; (define-key evil-motion-state-map (kbd "RET") nil)
+  ;; (define-key evil-motion-state-map (kbd "SPC") nil)
+  ;; (define-key evil-motion-state-map (kbd "TAB") nil)
+)
+;; This doesn't work in evil mode
+(setq org-return-follows-link t)
+
 (evil-define-key '(normal visual) 'global (kbd "]d") 'flymake-goto-next-error)
 (evil-define-key '(normal visual) 'global (kbd "[d") 'flymake-goto-prev-error)
 (evil-define-key '(normal visual) 'global (kbd "<leader>y") (cons "yank to clipbard" "\"+y"))
 (evil-define-key 'visual 'global (kbd "<leader>p") (cons "paste without losing selection" "\"_dP"))
-;; (defun append-semicolon (&optional n)
-;;     (interactive "p")
-;;     (use-region-p))
-(evil-define-key '(normal visual) 'global (kbd "C-;") (kbd "A; <escape>"))
+(evil-define-key '(normal visual) 'global (kbd "C-;") 'ss/append-semicolon)
+(evil-define-key '(normal visual) 'global (kbd "C-M-;") 'ss/append-comma)
+(evil-define-key 'visual 'global (kbd "M-j") 'ss/evil-move-down)
+(evil-define-key 'visual 'global (kbd "M-k") 'ss/evil-move-up)
+;; (evil-define-key '(normal visual) 'global (kbd "C-;") (kbd "A; <escape>"))
 (evil-define-key '(normal visual) 'global (kbd "C-S-d") 'duplicate-dwim)
 #+end_src
 ** Fixes
@@ -1433,6 +1499,20 @@ Scroll left and right
 #+begin_src emacs-lisp
 (add-hook 'text-mode-hook #'flyspell-mode)
 (add-hook 'prog-mode-hook #'flyspell-prog-mode)
+(setopt ispell-dictionary "en_US")
+(setopt ispell-alternate-dictionary (concat (getenv "HOME") "/.hunspell_en_US"))
+#+end_src
+** Grammar Check
+#+begin_src emacs-lisp
+(use-package flymake-languagetool
+  ;; :hook ((text-mode       . flymake-languagetool-load)
+  ;;        (latex-mode      . flymake-languagetool-load)
+  ;;        (org-mode        . flymake-languagetool-load)
+  ;;        (markdown-mode   . flymake-languagetool-load))
+  :init
+  ;; Local Server Configuration
+  (setq flymake-languagetool-server-jar
+	"/usr/share/java/languagetool/languagetool.jar"))
 #+end_src
 ** Wrap
 Do not wrap lines, truncate them
