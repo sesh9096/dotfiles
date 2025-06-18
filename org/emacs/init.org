@@ -974,7 +974,7 @@ https://github.com/minad/org-modern
 (defun ss/evil-move-down (beg end offset)
   "Move lines down in visual line mode"
   (interactive "r\np")
-  (evil-move beg end (+ (line-number-at-pos beg) offset))
+  (evil-move beg end (+ (line-number-at-pos end) (1- offset)))
   (evil-force-normal-state) ;work around what is probably a bug
   ;; (evil-visual-restore)
   ;; (evil-indent (region-beginning) (region-end))
@@ -1014,9 +1014,14 @@ https://github.com/minad/org-modern
   (ss/append-char ?;))
 
 (defun ss/append-comma ()
-  "Append semicolon to the end of the line or to the end of all lines in region"
+  "Append comman to the end of the line or to the end of all lines in region"
   (interactive)
   (ss/append-char ?,))
+
+(defun ss/append-period ()
+  "Append period to the end of the line or to the end of all lines in region"
+  (interactive)
+  (ss/append-char ?.))
 #+end_src
 ** Keymaps
 *** Toggle
@@ -1346,7 +1351,8 @@ Note: look under other
 (evil-define-key '(normal visual) 'global (kbd "<leader>y") (cons "yank to clipbard" "\"+y"))
 (evil-define-key 'visual 'global (kbd "<leader>p") (cons "paste without losing selection" "\"_dP"))
 (evil-define-key '(normal visual) 'global (kbd "C-;") 'ss/append-semicolon)
-(evil-define-key '(normal visual) 'global (kbd "C-M-;") 'ss/append-comma)
+(evil-define-key '(normal visual) 'global (kbd "C-<") 'ss/append-comma)
+(evil-define-key '(normal visual) 'global (kbd "C->") 'ss/append-period)
 (evil-define-key 'visual 'global (kbd "M-j") 'ss/evil-move-down)
 (evil-define-key 'visual 'global (kbd "M-k") 'ss/evil-move-up)
 ;; (evil-define-key '(normal visual) 'global (kbd "C-;") (kbd "A; <escape>"))

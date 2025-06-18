@@ -1,1 +1,11 @@
-profile
+#!/bin/zsh
+
+# gsettings set org.gnome.desktop.interface icon-theme Arc
+if [ "$(tty)" = "/dev/tty1" ] && ! pidof -s river > /dev/null 2>&1; then
+  XDG_CURRENT_DESKTOP=river
+  dbus-run-session river >> ~/.cache/river-log &
+fi
+
+# if command -v rbenv > /dev/null; then
+# 	eval "$(rbenv init - --no-rehash zsh)"
+# fi
