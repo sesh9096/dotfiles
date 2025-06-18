@@ -1,0 +1,11 @@
+#!/bin/sh
+searchpath="$@"
+prefix="$HOME"
+if [ $# -eq 1 ]; then
+	prefix="$1"
+fi
+resource="$(find $searchpath -name '*.pdf' -type f | sed "s|$prefix/||" | fuzzel --dmenu --width=80)"
+if [ -n "$resource" ]; then
+	zathura "$prefix/$resource"
+	# echo "$searchpath/$resource"
+fi

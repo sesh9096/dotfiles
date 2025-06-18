@@ -1,0 +1,10 @@
+#!/bin/sh
+
+sudo xbps-install -Su # update packages
+sudo xbps-remove -Oo # remove orphan packages
+sudo vkpurge rm all # remove old kernels
+docker system prune # remove unneeded docker objects
+sudo updatedb # update plocate db, should happen automatically
+sudo makewhatis /usr/share/man # update man db
+xlocate -S # update xlocate repo
+tldr -u # update tldr db
