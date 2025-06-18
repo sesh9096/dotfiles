@@ -1,0 +1,8 @@
+arc-icon-theme
+arc-theme
+font-iosevka
+gnome-themes-standard
+kvantum
+liberation-fonts-ttf
+nerd-fonts-symbols-ttf
+wqy-microhei

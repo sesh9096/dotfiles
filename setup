@@ -1,0 +1,165 @@
+#!/bin/sh
+
+mkdir -p ${XDG_CONFIG_HOME:=~/.config}
+mkdir -p ${XDG_CACHE_HOME:=~/.cache}
+: ${CHECK_INSTALLED:=xbps-query}
+: ${INSTALL_PACKAGE:=sudo xbps-install -y}
+: ${PROJECT_DIR:=$(which $0 | sed "s|/[^/]*$||")}
+# PROJECT_DIR=~/in/projects/dotfiles
+
+tangle_file() {
+	emacs -q --batch --eval="(require 'org)" --eval="(org-babel-tangle-file \"${1}\")"
+}
+
+ensure_installed() {
+	for package in $*; do
+		if $CHECK_INSTALLED "$package" > /dev/null; then
+			# echo "$package installed"
+			:
+		else
+			echo "$package not installed"
+			$INSTALL_PACKAGE $* || { echo "could not install: $*" && exit 2 ;}
+			return 0
+		fi
+	done
+}
+
+default_handler() {
+	config_dir=$PROJECT_DIR/config/$1
+	if [ '!' -d $config_dir ]; then
+		echo "Unrecognized target $1"
+		exit 2
+	fi
+	for config in $(ls $config_dir); do
+		ln -sri "$PROJECT_DIR/config/$1/$config" "${XDG_CONFIG_HOME}/"
+	done
+}
+
+enable_service() {
+	sudo ln -s /etc/sv/$1 /run/runit/runsvdir/current/
+}
+
+configure_pipewire() {
+	ensure_installed pipewire
+	if [ ! -e /etc/pipewire/pipewire.conf.d/10-wireplumber.conf ]; then
+		sudo mkdir -p /etc/pipewire/pipewire.conf.d
+		sudo ln -s /usr/share/examples/wireplumber/10-wireplumber.conf /etc/pipewire/pipewire.conf.d/
+	else
+		echo "wireplumber already configured"
+	fi
+	if [ ! -e /etc/pipewire/pipewire.conf.d/20-pipewire-pulse.conf ]; then
+		sudo mkdir -p /etc/pipewire/pipewire.conf.d
+		sudo ln -s /usr/share/examples/wireplumber/20-pipewire-pulse.conf /etc/pipewire/pipewire.conf.d/
+	else
+		echo "pipewire-pulse already configured"
+	fi
+}
+
+handle_target () {
+	# handle special targets and then call the default handler on the rest
+	case "$1" in
+		emacs)
+			ensure_installed emacs-pgtk
+			mkdir -p "$XDG_CONFIG_HOME/emacs"
+			# tangle_file "./org/emacs/init.org"
+			# TODO: separate this into a function so we can link
+			ln -sri $PROJECT_DIR/config/emacs/emacs/* "${XDG_CONFIG_HOME}/emacs/"
+			;;
+		river)
+			ensure_installed emacs-pgtk river git zig wayland-devel
+			tangle_file "./org/river/init.org"
+			chmod 744 "$XDG_CONFIG_HOME/river/init"
+			ODIR="$(pwd)"
+			cd $XDG_CACHE_HOME
+			git clone https://git.sr.ht/~novakane/rivercarro
+			cd rivercarro
+			zig build -Doptimize=ReleaseSafe --prefix ~/.local
+			cd "$ODIR"
+			;;
+		zsh)
+			ensure_installed zsh zsh-autosuggestions zsh-syntax-highlighting
+			ln -si $PROJECT_DIR/nsl/zsh/shell/env ~/.zshenv
+			echo "ZDOTDIR=$PROJECT_DIR/nsl/zsh/shell" >> ~/.zshenv
+			chsh /bin/zsh
+			;;
+		caps2esc)
+			ensure_installed caps2esc
+			sudo cp $PROJECT_DIR/nsl/caps2esc.yaml /etc/interception/udevmon.d/
+			enable_service udevmon
+			;;
+		nftables)
+			ensure_installed nftables
+			sudo cp ./nsl/nftables.conf /etc/nftables.conf
+			enable_service nftables
+			;;
+		firefox)
+			ensure_installed firefox curl
+			firefox &
+			ODIR="$(pwd)"
+			echo -n "in $PWD, in correct directory(y/n)?"
+			# cd ~/.mozilla/firefox/*.default/ # TODO: find a better way to do this
+			ln -sri $PROJECT_DIR/nsl/user-overrides.js ./
+			curl -O https://raw.githubusercontent.com/arkenfox/user.js/refs/heads/master/updater.sh
+			chmod u+x updater.sh
+			./updater.sh
+			cd "$ODIR"
+			;;
+		bin)
+			# binaries/scripts
+			mkdir -p ~/.local/bin/
+			ln -sri $PROJECT_DIR/local/bin/* ~/.local/bin/
+			;;
+		system)
+			ensure_installed $(cat ./etc/pkgs/system.txt)
+			for service in NetworkManager chronyd cronie seatd elogind polkitd dbus socklog-unix bluetoothd sshd; do
+				enable_service $service
+			done
+			for service in NetworkManager bluetoothd sshd; do
+				sudo touch /etc/sv/$service/down
+			done
+			;;
+		base)
+			ensure_installed $(cat ./etc/pkgs/base.txt)
+			configure_pipewire
+			flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+			;;
+		cli)
+			ensure_installed $(cat ./etc/pkgs/cli.txt)
+			;;
+		doc)
+			ensure_installed $(cat ./etc/pkgs/doc.txt)
+			;;
+		dev)
+			ensure_installed $(cat ./etc/pkgs/dev.txt)
+			;;
+		apps)
+			ensure_installed $(cat ./etc/pkgs/apps.txt)
+			;;
+		theme)
+			ensure_installed $(cat ./etc/pkgs/theme.txt)
+			;;
+		*)
+			default_handler "$1"
+			;;
+	esac
+}
+
+while [ -n "$1" ]; do
+	target="$1"
+	shift
+	# echo $@
+	# handle special targets and then call the default handler on the rest
+	case $target in
+		ensure_installed)
+			ensure_installed $@
+			;;
+		default)
+			for subtarget in base system zsh bin emacs caps2esc nftables theme doc cli river firefox; do
+				handle_target $subtarget
+			done
+			;;
+		*)
+			handle_target "$target"
+			;;
+	esac
+done

@@ -5,14 +5,25 @@ Do with this what you will
 * Installation
 Requires
 - git
-- stow
-- make
-This collection of dotfiles uses =gnu stow= and =make= to "automatically" deploy my dotfiles to the correct locations.
+- void linux
+This collection of dotfiles and scripts can be used with =./setup <target>=
+** Targets:
+- default :: full system
+- base :: user utilities and some things for everything else to work
+- system :: system daemons and other similar packages
+- cli :: cli/tui utilities
+- doc :: documentation(manpages, info, void docs)
+- theme :: themes and fonts
+- apps :: applications
+- firefox :: broken right now
+- nftables :: copy nftables config and enable
+- river :: river compositor and layout
+- emacs :: emacs-pgtk and copy all other details.
 * Software I currently use
 - Emacs
 - lf
 - dunst
 - neovim
-- Alacritty
+- foot
 - zsh
 * Other Software

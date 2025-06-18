@@ -1,0 +1,14 @@
+Waybar
+grim
+lswt
+river
+slurp
+swayidle
+swaylock
+wayland-devel
+wayland-protocols
+wl-clipboard
+wlr-randr
+wtype
+xdg-desktop-portal-gtk
+xdg-desktop-portal-wlr

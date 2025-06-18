@@ -1,0 +1,7 @@
+man-db
+man-pages-devel
+man-pages-posix
+scdoc
+texinfo
+tldr
+void-docs-browse

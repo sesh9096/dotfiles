@@ -1,0 +1,11 @@
+R
+clang
+lua-language-server
+python3-lsp-server
+python3-pandas
+python3-scikit-learn
+texlive-basic
+texlive-bibtexextra
+texlive-publishers
+zig
+zls
