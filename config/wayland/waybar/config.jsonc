@@ -141,7 +141,7 @@
         "tooltip": false
     },
     "memory": {
-        "format": "{used}Gb 󰒋  {swapUsed}Gb  "
+        "format": "{used}Gib 󰒋  {swapUsed}Gib  "
 //{ disk_free, " %s  ",           "/" },
 //{ disk_free, "󰋜 %s  ",           "/home" },
     },
@@ -180,7 +180,7 @@
         "format-charging": "{capacity}% 󰂄",
         "format-plugged": "{capacity}%  ",
         "format-alt": "{time} {icon} ",
-        "interval": 10,
+        "interval": 4,
         // "format-good": "", // An empty format will hide the module
         // "format-full": "",
         "format-icons": ["", "", "", "", ""]
