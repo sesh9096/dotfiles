@@ -312,14 +312,10 @@ riverctl map normal Super E spawn "emacsclient --alternate-editor='' --create-fr
 riverctl map normal Super X spawn "fuzzpkill"
 riverctl map normal Super+Shift X spawn "fuzzkill"
 riverctl map normal Super R spawn "find_resource $HOME/extern/resources"
+riverctl map normal Super B spawn "find_resource $HOME/extern/books"
 riverctl map normal Super+Shift R spawn "find_resource $HOME"
 # copy command to set currently focused window to float to clipboard
 riverctl map normal Super+Control+Shift Space spawn "lswt | awk -F \"  +\" 'NR != 1 && /^..a./ {print \"riverctl rule-add -app-id \" \$2 \" -title \" \$3 \" float\"}' | wl-copy; notify-send 'command copied'"
-# I need those clickers
-riverctl map normal Super+Control+Shift C spawn "xdg-open 'https://shibboleth-sp.reef-education.com/Shibboleth.sso/Login?entityID=https%3A%2F%2Ffedauth.colorado.edu%2Fidp%2Fshibboleth&target=https%3A%2F%2Fshibboleth-sp.reef-education.com%2Fv1%2Fusers%2Fcheck-federated-redirect%3FinstitutionId%3Db6454bb5-fd0d-473d-95b9-760440882390'"
-
-# riverctl map normal Super V spawn "nmcli connection up 'UCB VPN rc' && notify-send 'Connected to UCB VPN rc'"
-riverctl map normal Super V spawn "if nmcli connection show 'UCB VPN rc' | grep GENERAL.STATE > /dev/null; then nmcli connection down 'UCB VPN rc' && notify-send 'Disconnected from UCB VPN rc'; else nmcli connection up 'UCB VPN rc' && notify-send 'Connected to UCB VPN rc'; fi"
 #+end_src
 * rules
 use =lswt= to get app-id's and names

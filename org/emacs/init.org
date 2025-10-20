@@ -43,7 +43,7 @@ Interactive repl
 (setq gc-cons-threshold 20000000)
 #+end_src
 #+begin_src emacs-lisp
-(add-to-list 'default-frame-alist '(font . "monospace-9"))
+(add-to-list 'default-frame-alist '(font . "monospace-9"));
 #+end_src
 ** Utility packages
 #+begin_src emacs-lisp
@@ -159,10 +159,13 @@ A package for highlighting and manipulating diffs/changes
   (vertico-indexed-mode)
   (vertico-mouse-mode)
   (vertico-reverse-mode)
-  ;; (setq vertico-multiform-categories
-  ;;       '((buffer)))
-  ;; (vertico-multiform-mode)
+  :config
+  (vertico-multiform-mode)
+  (setq vertico-multiform-categories
+      '((file grid)
+        (consult-grep buffer (:not reverse))))
   ;; (vertico-unobtrusive-mode 0)
+  ;; (vertico-buffer-mode 0)
 
   ;; Different scroll margin
   ;; (setq vertico-scroll-margin 0)
@@ -186,13 +189,7 @@ Use margins for more useful purpose
   ;; `completion-list-mode-map'.
   :bind (:map minibuffer-local-map
          ("M-A" . marginalia-cycle))
-
-  ;; The :init section is always executed.
   :init
-
-  ;; Marginalia must be activated in the :init section of use-package such that
-  ;; the mode gets enabled right away. Note that this forces loading the
-  ;; package.
   (marginalia-mode))
 #+end_src
 *** Orderless
@@ -204,23 +201,52 @@ Use margins for more useful purpose
   (completion-category-overrides '((file (styles basic partial-completion orderless flex))))
 )
 #+end_src
+*** Consult
+#+begin_src emacs-lisp
+(use-package consult)
+#+end_src
+*** Embark
+#+begin_src emacs-lisp
+(use-package embark
+  :bind
+  (("C-S-e" . embark-act)         ;; pick some comfortable binding
+   ;; ("C-;" . embark-dwim)        ;; good alternative: M-.
+   ("C-h B" . embark-bindings)) ;; alternative for `describe-bindings'
+
+  :init
+  ;; Optionally replace the key help with a completing-read interface
+  (setq prefix-help-command #'embark-prefix-help-command)
+
+  ;; Show the Embark target at point via Eldoc. You may adjust the
+  ;; Eldoc strategy, if you want to see the documentation from
+  ;; multiple providers. Beware that using this can be a little
+  ;; jarring since the message shown in the minibuffer can be more
+  ;; than one line, causing the modeline to move up and down:
+
+  ;; (add-hook 'eldoc-documentation-functions #'embark-eldoc-first-target)
+  ;; (setq eldoc-documentation-strategy #'eldoc-documentation-compose-eagerly)
+
+  ;; Add Embark to the mouse context menu. Also enable `context-menu-mode'.
+  ;; (context-menu-mode 1)
+  ;; (add-hook 'context-menu-functions #'embark-context-menu 100)
+
+  :config
+
+  ;; Hide the mode line of the Embark live/completions buffers
+  (add-to-list 'display-buffer-alist
+               '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
+                 nil
+                 (window-parameters (mode-line-format . none)))))
+
+(use-package embark-consult
+  :hook
+  (embark-collect-mode . consult-preview-at-point-mode))
+#+end_src
 *** History
 #+begin_src emacs-lisp
 (recentf-mode 1)
 (setq history-length 32)
 (savehist-mode 1)
-#+end_src
-*** Consult
-#+begin_src emacs-lisp
-(use-package consult)
-#+end_src
-*** Fuzzy
-Trying out fzf right now due to terrible performance by =consult-find=.
-
-Try out flx, affe, ...?
-#+begin_src emacs-lisp
-;; fzf wrapper
-;; (use-package fzf)
 #+end_src
 ** In buffer
 *** Corfu
@@ -369,22 +395,34 @@ Other options:
   :config (pdf-tools-install :no-query)
 )
 #+end_src
-** epub
+** books
 #+begin_src emacs-lisp
 ;; Read ePub files
 (use-package nov
   :mode ("\\.epub\\'" . nov-mode)
   :config
-  (defun my-nov-font-setup ()
-    ;; (face-remap-add-relative 'variable-pitch :height 2.0)
+  (defun ss/nov-font-setup ()
+    (face-remap-add-relative 'variable-pitch :family "serif" :height 1.0)
     (face-remap-add-relative 'default :height 1.0)
-    (face-remap-add-relative 'nobreak-space :underline nil)
-    (nov-render-document))
-  :hook (nov-mode . my-nov-font-setup)
+    (whitespace-mode -1)
+    (face-remap-add-relative 'nobreak-space :underline nil))
+  :hook (nov-mode . ss/nov-font-setup)
   :bind (:map nov-mode-map
               ("d" . 'dictionary-search)
+              ("<normal-state>a" . 'nov-reopen-as-archive)
+              ("<normal-state>r" . 'nov-history-forward)
+              ("<normal-state>p" . 'nov-history-back)
               ("<normal-state>d" . 'dictionary-search)
               ("<visual-state>d" . 'dictionary-search)))
+
+(use-package fb2-reader
+  :mode ("\\.fb2\\(\\.zip\\)?\\'" . fb2-reader-mode)
+  :commands (fb2-reader-continue)
+  :custom
+  ;; This mode renders book with fixed width, adjust to your preferences.
+  ;; (fb2-reader-page-width 120)
+  (fb2-reader-image-max-width 400)
+  (fb2-reader-image-max-height 400))
 #+end_src
 ** markdown
 #+begin_src emacs-lisp
@@ -434,6 +472,10 @@ Other options:
 #+end_src
 ** info
 [[info:info#Advanced][info]]
+** epg
+#+begin_src emacs-lisp
+(setq epg-pinentry-mode 'loopback)
+#+end_src
 ** vterm
 #+begin_src emacs-lisp
 (use-package vterm
@@ -452,6 +494,40 @@ Other options:
 (add-to-list 'load-path "/usr/share/emacs/site-lisp/mu4e")
 (use-package mu4e
   :commands (mu4e)
+  :custom
+  (mu4e-get-mail-command "mbsync -a")
+  (mu4e-update-interval 1800)
+  (mu4e-notificaton-support t)
+  (mu4e-drafts-folder "/[Gmail]/Drafts")
+  (mu4e-sent-folder   "/[Gmail]/Sent Mail")
+  (mu4e-trash-folder  "/[Gmail]/Trash")
+  ;; work better with mbsync
+  (mu4e-change-filenames-when-moving t)
+  (user-mail-address "xiang7241@gmail.com")
+  ;; (mu4e-maildir-shortcuts
+  ;;  '( (:maildir "/Inbox"              :key ?i)
+  ;;     (:maildir "/[Gmail]/Sent Mail"  :key ?s)
+  ;;     (:maildir "/[Gmail]/Trash"      :key ?t)
+  ;;     (:maildir "/[Gmail]/Important"  :key ?I)
+  ;;     (:maildir "/[Gmail]/Starred"    :key ?S)
+  ;;     (:maildir "/[Gmail]/Spam"       :key ?T)
+  ;;     (:maildir "/[Gmail]/All Mail"   :key ?a)))
+  :config
+  (dolist (bookmark '(
+               (:query "maildir:/[Gmail]/All\\ Mail" :name "All Mail" :key ?a :favorite t)
+               (:query "maildir:/[Gmail]/Drafts" :name "Drafts" :key ?d :favorite t)
+               (:query "maildir:/[Gmail]/Sent\\ Mail" :name "Sent" :key ?s :favorite t)
+               (:query "maildir:/[Gmail]/Trash" :name "Trash" :key ?t :favorite t)
+               (:query "maildir:/Inbox" :name "Inbox" :key ?i :favorite t)))
+  (add-to-list 'mu4e-bookmarks bookmark))
+               ;; ':favorite t' i.e, use this one for the modeline
+  (setq message-send-mail-function 'smtpmail-send-it
+        mu4e-sent-messages-behavior 'delete
+        smtpmail-stream-type 'starttls
+        smtpmail-default-smtp-server "smtp.gmail.com"
+        smtpmail-smtp-server "smtp.gmail.com"
+        smtpmail-queue-dir "~/extern/mail/queued-mail/"
+        smtpmail-smtp-service 587)
   :ensure nil)
 #+end_src
 ** feeds
@@ -742,6 +818,12 @@ Increment and decrement numbers
 #+begin_src emacs-lisp
 (add-hook 'prog-mode-hook #'hs-minor-mode)
 #+end_src
+** evil-args
+#+begin_src emacs-lisp
+(use-package evil-args
+  :bind ((:map evil-inner-text-objects-map ("a" . 'evil-inner-arg))
+         (:map evil-outer-text-objects-map ("a" . 'evil-outer-arg))))
+#+end_src
 * DAP
 #+begin_src emacs-lisp
 ;; (use-package dape
@@ -1025,6 +1107,13 @@ https://github.com/minad/org-modern
 #+end_src
 ** Keymaps
 *** Toggle
+**** org
+#+begin_src emacs-lisp
+(defvar-keymap ss/org-toggle-map :doc "org toggles"
+               "e" '("Emphasis markers" . (lambda() (interactive) (setq org-hide-emphasis-markers (not org-hide-emphasis-markers))))
+               "l" '("links" . org-toggle-link-display))
+#+end_src
+**** main
 #+begin_src emacs-lisp
 ;; (makunbound 'ss/toggle-map)
 (defun ss/cycle-alpha ()
@@ -1034,7 +1123,7 @@ https://github.com/minad/org-modern
 (defvar-keymap ss/toggle-map  :doc "Keymap for toggling things"
   "t" '("Tabs" . indent-tabs-mode)
   "n" '("Toggle numbers" . display-line-numbers-mode)
-  "e" '("Emphasis markers" . (lambda() (interactive) (setq org-hide-emphasis-markers (not org-hide-emphasis-markers))))
+  "o" (cons "org" ss/org-toggle-map)
   "a" '("alpha" . ss/cycle-alpha)
   "k" '("center" . visual-fill-column-mode)
   "b" '("bar" . menu-bar-mode)
@@ -1082,6 +1171,7 @@ https://github.com/minad/org-modern
   "F" '("File(original)" . find-file)
   "r" '("Recent" . recentf-open)
   "b" '("Buffer" . consult-buffer)
+  "l" '("Locate" . consult-locate)
 )
 #+end_src
 *** Git
@@ -1376,6 +1466,8 @@ Remap where space is used elsewhere
 (evil-collection-define-key 'normal 'org-mode-map (kbd "RET") 'org-open-at-point)
 (evil-define-key 'normal magit-mode-map (kbd "SPC") ss/leader-map)
 (evil-define-key 'normal magit-mode-map (kbd "S-SPC") 'magit-diff-show-or-scroll-up)
+;; for some reason, -c causes issues with some images
+(setopt archive-zip-extract '("unzip" "-qq" "-p"))
 #+end_src
 * UI
 ** Modeline
@@ -1696,6 +1788,7 @@ Always save bookmarks after creation, emacs has crashed sometimes
 (set-face-attribute 'info-title-2 nil :font "sans-serif" :height 140)
 (set-face-attribute 'info-title-3 nil :font "sans-serif" :height 130)
 (set-face-attribute 'info-title-4 nil :font "sans-serif" :height 120)
+(set-face-attribute 'shr-link nil :underline t :foreground "DeepSkyBlue4")
 (set-face-attribute 'info-node nil :font "sans-serif" :height 90)
 ;; (set-face-attribute 'org-block-begin-line nil :font "monospace" :height 80 :background "#000030")
 ;; (set-face-attribute 'org-block-end-line   nil :font "monospace" :height 80 :background "#000030")
