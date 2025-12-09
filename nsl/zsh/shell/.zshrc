@@ -88,4 +88,18 @@ PROMPT=$PROMPT'%{$(vterm_prompt_end)%}'
 source <(fzf --zsh)
 # Set up zoxide(z)
 eval "$(zoxide init zsh)"
+# zsh parameter completion for the dotnet CLI
+_dotnet_zsh_complete()
+{
+  local completions=("$(dotnet complete "$words")")
+  # If the completion list is empty, just continue with filename selection
+  if [ -z "$completions" ]
+  then
+    _arguments '*::arguments: _normal'
+    return
+  fi
+  # This is not a variable assignment, don't remove spaces!
+  _values = "${(ps:\n:)completions}"
+}
+compdef _dotnet_zsh_complete dotnet
 source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
