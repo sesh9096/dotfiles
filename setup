@@ -61,7 +61,7 @@ handle_target () {
 		emacs)
 			ensure_installed emacs-pgtk
 			mkdir -p "$XDG_CONFIG_HOME/emacs"
-			# tangle_file "./org/emacs/init.org"
+			tangle_file "./org/emacs/init.org"
 			# TODO: separate this into a function so we can link
 			ln -sri $PROJECT_DIR/config/emacs/emacs/* "${XDG_CONFIG_HOME}/emacs/"
 			;;
