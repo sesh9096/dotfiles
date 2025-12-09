@@ -406,7 +406,22 @@ Other options:
     (face-remap-add-relative 'default :height 1.0)
     (whitespace-mode -1)
     (face-remap-add-relative 'nobreak-space :underline nil))
-  :hook (nov-mode . ss/nov-font-setup)
+  ;; densify text
+  (defun ss/nov-pre-html-render ()
+    (save-excursion
+      (beginning-of-buffer)
+      ;; (while (re-search-forward "<p class=.*?>" nil t))
+      (while (re-search-forward "<p.*?>" nil t)
+        (insert "​ "))))
+  (defun ss/nov-post-html-render ()
+    (save-excursion
+      (beginning-of-buffer)
+      (while (re-search-forward "\n​" nil t)
+        (replace-match " " nil nil))))
+  :hook
+  (nov-mode . ss/nov-font-setup)
+  (nov-pre-html-render . ss/nov-pre-html-render)
+  (nov-post-html-render . ss/nov-post-html-render)
   :bind (:map nov-mode-map
               ("d" . 'dictionary-search)
               ("<normal-state>a" . 'nov-reopen-as-archive)
@@ -436,6 +451,9 @@ Other options:
   :custom-face
   ;; (markdown-header-face ((t (:weight normal))))
   (markdown-header-face ((t (:font "sans-serif")))))
+
+(use-package adoc-mode
+  :mode ("\\.adoc\\'" . adoc-mode))
 #+end_src
 ** latex
 #+begin_src emacs-lisp
@@ -498,12 +516,25 @@ Other options:
   (mu4e-get-mail-command "mbsync -a")
   (mu4e-update-interval 1800)
   (mu4e-notificaton-support t)
+  (mu4e-trash-without-flag t)
   (mu4e-drafts-folder "/[Gmail]/Drafts")
   (mu4e-sent-folder   "/[Gmail]/Sent Mail")
   (mu4e-trash-folder  "/[Gmail]/Trash")
   ;; work better with mbsync
   (mu4e-change-filenames-when-moving t)
+  (mu4e-sent-messages-behavior 'delete)
   (user-mail-address "xiang7241@gmail.com")
+  (mu4e-bookmarks
+   '((:name "Unread messages"      :key ?u :query "flag:unread AND NOT flag:trashed AND NOT maildir:/[Gmail]/Trash")
+     (:name "Today's messages"     :key ?t :query "date:today..now")
+     (:name "Last 7 days"          :key ?w :query "date:7d..now" :hide-unread t)
+     (:name "Messages with images" :key ?p :query "mime:image/*")
+     ;; custom additional
+     (:name "Inbox"                :key ?i :query "maildir:/Inbox" :favorite t)
+     (:name "All Mail"             :key ?a :query "maildir:/[Gmail]/All\\ Mail")
+     (:name "Drafts"               :key ?d :query "maildir:/[Gmail]/Drafts")
+     (:name "Sent"                 :key ?s :query "maildir:/[Gmail]/Sent\\ Mail")
+     (:name "Trash"                :key ?T :query "maildir:/[Gmail]/Trash")))
   ;; (mu4e-maildir-shortcuts
   ;;  '( (:maildir "/Inbox"              :key ?i)
   ;;     (:maildir "/[Gmail]/Sent Mail"  :key ?s)
@@ -513,21 +544,29 @@ Other options:
   ;;     (:maildir "/[Gmail]/Spam"       :key ?T)
   ;;     (:maildir "/[Gmail]/All Mail"   :key ?a)))
   :config
-  (dolist (bookmark '(
-               (:query "maildir:/[Gmail]/All\\ Mail" :name "All Mail" :key ?a :favorite t)
-               (:query "maildir:/[Gmail]/Drafts" :name "Drafts" :key ?d :favorite t)
-               (:query "maildir:/[Gmail]/Sent\\ Mail" :name "Sent" :key ?s :favorite t)
-               (:query "maildir:/[Gmail]/Trash" :name "Trash" :key ?t :favorite t)
-               (:query "maildir:/Inbox" :name "Inbox" :key ?i :favorite t)))
-  (add-to-list 'mu4e-bookmarks bookmark))
-               ;; ':favorite t' i.e, use this one for the modeline
+  ;; ':favorite t' i.e, use this one for the modeline
   (setq message-send-mail-function 'smtpmail-send-it
-        mu4e-sent-messages-behavior 'delete
         smtpmail-stream-type 'starttls
         smtpmail-default-smtp-server "smtp.gmail.com"
         smtpmail-smtp-server "smtp.gmail.com"
         smtpmail-queue-dir "~/extern/mail/queued-mail/"
         smtpmail-smtp-service 587)
+
+  (defun ss/terminal-mu4e-update-mail-and-index ()
+    "open a terminal to update maildirs"
+    (interactive)
+    (if (not (boundp 'ss/mu4e-get-mail-command-backup))
+        (setq ss/mu4e-get-mail-command-backup mu4e-get-mail-command))
+    (setq mu4e-get-mail-command (concat "foot -T 'floating window' " ss/mu4e-get-mail-command-backup))
+    (mu4e-update-mail-and-index t)
+    (setopt mu4e-get-mail-command ss/mu4e-get-mail-command-backup)
+    (makunbound 'ss/mu4e-get-mail-command-backup))
+  :bind (:map mu4e-main-mode-map
+              ("M-U" . ss/terminal-mu4e-update-mail-and-index)
+              ("O" . mu4e-search-change-sorting)
+              :map mu4e-headers-mode-map
+              ("M-U" . ss/terminal-mu4e-update-mail-and-index)
+              ("O" . mu4e-search-change-sorting))
   :ensure nil)
 #+end_src
 ** feeds
@@ -553,6 +592,10 @@ Other options:
 (use-package go-mode
   :mode "\\.go\\'"
   :config (gofmt-before-save))
+#+end_src
+** guile
+#+begin_src emacs-lisp
+(use-package geiser-guile)
 #+end_src
 * Files
 ** Dired
@@ -887,6 +930,7 @@ Increment and decrement numbers
      ;; (sagemath . t)
      (lua . t)
      (js . t)
+     (scheme . t)
      (R . t)))
   (setq org-confirm-babel-evaluate nil)
   (setq org-export-use-babel nil)
@@ -914,6 +958,8 @@ Nice syntax highlighting
                   ("lua" . "src lua")
                   ("js" . "src js")
                   ("clang" . "src c")
+                  ("scheme" . "src scheme")
+                  ("scm" . "src scheme")
                   ("cpp" . "src cpp")
                   ("zig" . "src zig")
                   ("R" . "src R")))
@@ -1349,8 +1395,9 @@ https://github.com/minad/org-modern
   "t" '("terminal" . vterm)
   "c" '("calc" . calc)
   "C" '("calc(embedded)" . calc-embedded)
+  "C-c" '("quick calc" . quick-calc)
   "m" '("mail" . mu4e)
-  "s" '("sage" . sage-shell:run-sage)
+  ;; "s" '("sage" . sage-shell:run-sage)
   "f" '("feed" . elfeed)
   "i" '("irc" . erc-tls)
   "b" '("background process" . ss/run-background-process)
@@ -1468,6 +1515,7 @@ Remap where space is used elsewhere
 (evil-define-key 'normal magit-mode-map (kbd "S-SPC") 'magit-diff-show-or-scroll-up)
 ;; for some reason, -c causes issues with some images
 (setopt archive-zip-extract '("unzip" "-qq" "-p"))
+(add-hook 'compilation-filter-hook 'ansi-color-compilation-filter)
 #+end_src
 * UI
 ** Modeline

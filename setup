@@ -67,6 +67,7 @@ handle_target () {
 			;;
 		river)
 			ensure_installed emacs-pgtk river git zig wayland-devel
+      mkdir -p $HOME/.config/river/
 			tangle_file "./org/river/init.org"
 			chmod 744 "$XDG_CONFIG_HOME/river/init"
 			ODIR="$(pwd)"
@@ -80,7 +81,7 @@ handle_target () {
 			ensure_installed zsh zsh-autosuggestions zsh-syntax-highlighting
 			ln -si $PROJECT_DIR/nsl/zsh/shell/env ~/.zshenv
 			echo "ZDOTDIR=$PROJECT_DIR/nsl/zsh/shell" >> ~/.zshenv
-			chsh /bin/zsh
+			chsh -s /bin/zsh
 			;;
 		caps2esc)
 			ensure_installed caps2esc

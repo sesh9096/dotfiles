@@ -333,6 +333,7 @@ riverctl rule-add -app-id Gimp-2.10 -title "Quit GIMP" float
 riverctl rule-add -app-id org.inkscape.Inkscape -title "Formula (pdflatex)" float
 riverctl rule-add -app-id emacs -title Ediff float
 riverctl rule-add -app-id thunar -title "File Operation Progress" float
+riverctl rule-add -title "floating window" float
 #+end_src
 ** default tags
 1. terminals

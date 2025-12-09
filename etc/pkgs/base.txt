@@ -13,12 +13,8 @@ mpv
 neovim
 network-manager-applet
 poppler
-poppler-devel
-poppler-glib-devel
 psmisc
 python3-dbus
-python3-devel
-qt5-wayland
 rtkit
 simple-mtpfs
 speech-dispatcher
