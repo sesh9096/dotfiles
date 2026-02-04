@@ -258,7 +258,7 @@ Tweak setting for faster response time
   :custom
   (corfu-auto t)                 ;; Enable auto completion
   (corfu-auto-prefix 2)          ;; auto complete after 2 chars
-  (corfu-auto-delay 0.25)
+  (corfu-auto-delay 0.15)
   (corfu-echo-delay '(0.25 . 0.25))
   (corfu-popupinfo-delay '(0.5 . 0.25))
   (corfu-quit-no-match 'separator) ;; or t
@@ -596,6 +596,11 @@ Other options:
 ** guile
 #+begin_src emacs-lisp
 (use-package geiser-guile)
+#+end_src
+** js
+#+begin_src emacs-lisp
+(use-package js-comint
+  :commands (run-js))
 #+end_src
 * Files
 ** Dired
@@ -1403,12 +1408,22 @@ https://github.com/minad/org-modern
   "b" '("background process" . ss/run-background-process)
 )
 #+end_src
+*** Case Management
+#+begin_src emacs-lisp
+(load-file (concat user-emacs-directory "cycle-case.el"))
+;; (makunbound 'ss/case-map)
+(defvar-keymap ss/case-map :doc "Change case" ;:keymap ss/case-map
+  "s" '("set" . ss/change-case)
+  "c" '("cycle" . ss/cycle-case)
+)
+#+end_src
+
 ** Leader
 #+begin_src emacs-lisp
 (evil-set-leader '(normal visual) (kbd "SPC"))
 (evil-set-leader nil (kbd "M-SPC"))
 ;; (makunbound 'ss/leader-map)
-(defvar-keymap ss/leader-map  :doc "Leader map"
+(defvar-keymap ss/leader-map  :doc "Leader map" ; :keymap ss/leader-map
   "t" (cons "Toggle"  ss/toggle-map)
   "o" (cons "Org"  ss/org-map)
   "f" (cons "Find"  ss/find-map)
@@ -1419,6 +1434,7 @@ https://github.com/minad/org-modern
   "e" (cons "Eval"  ss/elisp-map)
   "p" (cons "Project"  projectile-command-map)
   "s" (cons "Start"  ss/start-map)
+  "C" (cons "Case"  ss/case-map)
   "SPC" '("Find" . consult-buffer)
   "/" '("grep" . consult-ripgrep)
   "j" '("Jump to Directory" . dired-jump)

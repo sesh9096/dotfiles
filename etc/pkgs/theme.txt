@@ -1,5 +1,6 @@
 arc-icon-theme
 arc-theme
+breeze-obsidian-cursor-theme
 font-iosevka
 gnome-themes-standard
 kvantum

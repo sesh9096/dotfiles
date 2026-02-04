@@ -1,9 +1,5 @@
 Thunar
-alacritty
-bookworm
-breeze-obsidian-cursor-theme
 d-spy
-firefox
 gimp
 inkscape
 jupyterlab

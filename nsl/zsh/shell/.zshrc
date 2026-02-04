@@ -103,3 +103,4 @@ _dotnet_zsh_complete()
 }
 compdef _dotnet_zsh_complete dotnet
 source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+fpath=($HOME/.local/share/zsh $fpath)

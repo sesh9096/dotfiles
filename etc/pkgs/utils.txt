@@ -1,6 +1,7 @@
 ImageMagick
 brightnessctl
 curl
+dict
 dunst
 emacs-pgtk
 flatpak
@@ -16,7 +17,6 @@ poppler
 psmisc
 python3-dbus
 rtkit
-simple-mtpfs
 speech-dispatcher
 udisks2
 wget

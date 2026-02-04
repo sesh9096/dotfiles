@@ -1,6 +1,8 @@
 R
 clang
 lua-language-server
+pkgconf
+pkgconf-devel
 python3-lsp-server
 python3-pandas
 python3-scikit-learn

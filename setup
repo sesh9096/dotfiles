@@ -81,6 +81,8 @@ handle_target () {
 			ensure_installed zsh zsh-autosuggestions zsh-syntax-highlighting
 			ln -si $PROJECT_DIR/nsl/zsh/shell/env ~/.zshenv
 			echo "ZDOTDIR=$PROJECT_DIR/nsl/zsh/shell" >> ~/.zshenv
+			mkdir -p "$XDG_STATE_HOME/zsh/"
+			# mkdir -p $HOME/.local/share/zsh && curl https://codeberg.org/ziglang/shell-completions/raw/branch/master/_zig -o $HOME/.local/share/zsh/_zig
 			chsh -s /bin/zsh
 			;;
 		caps2esc)
@@ -118,10 +120,10 @@ handle_target () {
 			for service in NetworkManager bluetoothd sshd; do
 				sudo touch /etc/sv/$service/down
 			done
-			;;
-		base)
-			ensure_installed $(cat ./etc/pkgs/base.txt)
 			configure_pipewire
+			;;
+		utils)
+			ensure_installed $(cat ./etc/pkgs/utils.txt)
 			flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
 			;;
 		cli)
@@ -155,7 +157,7 @@ while [ -n "$1" ]; do
 			ensure_installed $@
 			;;
 		default)
-			for subtarget in base system zsh bin emacs caps2esc nftables theme doc cli river firefox; do
+			for subtarget in utils system zsh bin emacs caps2esc nftables theme doc cli river firefox; do
 				handle_target $subtarget
 			done
 			;;

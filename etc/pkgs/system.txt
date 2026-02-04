@@ -1,10 +1,8 @@
 NetworkManager
-NetworkManager-openconnect
 alsa-pipewire
 alsa-tools
 alsa-utils
 bluez
-caps2esc
 chrony
 cronie
 cryptsetup

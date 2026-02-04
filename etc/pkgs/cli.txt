@@ -1,14 +1,8 @@
-ansible
-autoconf
-automake
 bat
 bind-utils
-bison
 btop
 chafa
 cmake
-dict
-docker-compose
 dos2unix
 fastfetch
 flex
@@ -24,8 +18,6 @@ net-tools
 netcat
 pandoc
 perl-File-MimeInfo
-pkgconf
-pkgconf-devel
 powertop
 ripgrep
 rsync
