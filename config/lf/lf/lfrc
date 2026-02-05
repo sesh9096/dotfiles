@@ -2,7 +2,6 @@
 set shell sh
 set hidden true
 set mouse true
-set sixel true
 set previewer '~/.config/lf/previewer.sh'
 set info size
 set drawbox true

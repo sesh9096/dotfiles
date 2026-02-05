@@ -1,0 +1,10 @@
+.window-frame {
+	box-shadow: none;
+	margin: 0;
+}
+/* remove the pesky default titlebars  */
+headerbar.default-decoration {
+	/* You may need to tweak these values depending on your GTK theme */
+	margin-bottom: 50px;
+	margin-top: -100px;
+}

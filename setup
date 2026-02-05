@@ -3,7 +3,7 @@
 mkdir -p ${XDG_CONFIG_HOME:=~/.config}
 mkdir -p ${XDG_CACHE_HOME:=~/.cache}
 : ${CHECK_INSTALLED:=xbps-query}
-: ${INSTALL_PACKAGE:=sudo xbps-install -y}
+: ${INSTALL_PACKAGE:=sudo xbps-install -S}
 : ${PROJECT_DIR:=$(which $0 | sed "s|/[^/]*$||")}
 # PROJECT_DIR=~/in/projects/dotfiles
 
@@ -66,7 +66,7 @@ handle_target () {
 			ln -sri $PROJECT_DIR/config/emacs/emacs/* "${XDG_CONFIG_HOME}/emacs/"
 			;;
 		river)
-			ensure_installed emacs-pgtk river git zig wayland-devel
+			ensure_installed emacs-pgtk river git zig wayland-devel wayland-protocols
       mkdir -p $HOME/.config/river/
 			tangle_file "./org/river/init.org"
 			chmod 744 "$XDG_CONFIG_HOME/river/init"

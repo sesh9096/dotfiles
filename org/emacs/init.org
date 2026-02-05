@@ -22,8 +22,8 @@ Interactive repl
 
 #+begin_src emacs-lisp
 (require 'package)
-  (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/"))
-  (package-initialize)
+(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
+(package-initialize)
 (require 'use-package)
 (setq use-package-always-ensure t)
 (setq use-package-always-defer t)
@@ -1144,7 +1144,7 @@ https://github.com/minad/org-modern
 (defun ss/append-semicolon ()
   "Append semicolon to the end of the line or to the end of all lines in region"
   (interactive)
-  (ss/append-char ?;))
+  (ss/append-char ?\;))
 
 (defun ss/append-comma ()
   "Append comman to the end of the line or to the end of all lines in region"

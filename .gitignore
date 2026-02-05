@@ -1,2 +1,3 @@
 **/\.zcompdump
 /config/nvim/nvim/lazy-lock.json
+/config/theming/gtk-3.0/bookmarks
