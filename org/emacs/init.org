@@ -1446,7 +1446,7 @@ https://github.com/minad/org-modern
   "u" '("universal argument" . universal-argument)
 )
 (evil-define-key 'normal 'global (kbd "<leader>") (cons "Leader"  ss/leader-map))
-(eval-after-load 'dired
+(with-eval-after-load 'dired
   (evil-define-key 'normal dired-mode-map (kbd "SPC") ss/leader-map))
 ;; (evil-define-key 'insert 'global (kbd "<leader>") (cons "Leader"  ss/leader-map))
 #+end_src

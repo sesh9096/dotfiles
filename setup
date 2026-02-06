@@ -40,7 +40,7 @@ enable_service() {
 }
 
 configure_pipewire() {
-	ensure_installed pipewire
+	ensure_installed pipewire alsa-pipewire
 	if [ ! -e /etc/pipewire/pipewire.conf.d/10-wireplumber.conf ]; then
 		sudo mkdir -p /etc/pipewire/pipewire.conf.d
 		sudo ln -s /usr/share/examples/wireplumber/10-wireplumber.conf /etc/pipewire/pipewire.conf.d/
@@ -52,6 +52,13 @@ configure_pipewire() {
 		sudo ln -s /usr/share/examples/wireplumber/20-pipewire-pulse.conf /etc/pipewire/pipewire.conf.d/
 	else
 		echo "pipewire-pulse already configured"
+	fi
+	if [ ! -e /etc/alsa/alsa.conf.d/50-pipewire.conf ]; then
+		sudo mkdir -p /etc/alsa/alsa.conf.d/
+		sudo ln -s /usr/share/alsa/alsa.conf.d/50-pipewire.conf /etc/alsa/alsa.conf.d/
+		sudo ln -s /usr/share/alsa/alsa.conf.d/99-pipewire-default.conf /etc/alsa/alsa.conf.d/
+	else
+		echo "alsa-pipewire already configured"
 	fi
 }
 
